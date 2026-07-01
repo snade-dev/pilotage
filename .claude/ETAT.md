@@ -12,12 +12,18 @@
 | Module Statistiques (backend) | back | ✅ mergé |
 | Module Statistiques (frontend) | front | ✅ mergé sur main |
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
-| 4 Robustesse données | back | ⬜ prompt prêt, à lancer |
+| 4 Robustesse données | back | 🟡 4 lots faits sur branche (isolation/tx/index/audit) ; 2 migrations à déployer ; branchements audit prix+permissions restants |
 | 5 Duplication | front + back | ⬜ |
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
 ## En cours / en attente
-- [ ] ⚠️ **Migration d'index stats backend NON appliquée en base** (`prisma migrate deploy`).
+- [ ] ⚠️ **3 migrations backend NON appliquées en base** (`prisma migrate deploy`), à déployer ensemble :
+      `..._add_stats_supermarche_indexes`, `20260701140000_phase4_hot_path_indexes`,
+      `20260701150000_phase4_audit_journal` (cette dernière fait un DROP/ADD de la FK
+      `historique_utilisateurId_fkey` — additif, aucune donnée perdue).
+- [ ] Phase 4 : brancher le journal d'audit sur annulation de vente, modification de prix
+      (produit/plat), changement de permissions/rôles (seam `AuditJournalService` prêt).
+- [ ] Phase 4 : PR + merge de `feat/phase-4-data-robustness` ; e2e à passer (écrivent sur BD dev).
 
 ## Fait (validé + mergé)
 ### Backend
@@ -41,10 +47,15 @@
 - [x] Page comparaison des établissements `/owner/comparaison` (tableau KPI triable + export CSV,
       graphe multi-courbes CA net, période + granularité) — mergée sur main (637a355 ; merge
       re-vérifié type-clean sous le build type-checké Phase 3). SESSIONS/2026-07-01-stats-comparaison-front.md
+- [x] Phase 4 Robustesse données — 4 lots sur `feat/phase-4-data-robustness` (146 unit verts) :
+      B1 isolation (faille cross-restaurant POS resto CONFIRMÉE + corrigée : `where` sur relation
+      to-one `plat` ignoré par Prisma 5.7), B2 atomicité session caisse resto, B3 index hot paths,
+      B4 journal d'audit immuable (`historique`) branché sur les 3 remboursements.
+      SESSIONS/2026-07-01-phase-4-data-robustness.md
 
 ## Prochaine action
-1. Appliquer la migration d'index stats backend en base (`prisma migrate deploy`).
-2. Lancer la Phase 4 backend (robustesse données).
+1. Déployer les 3 migrations backend en attente (`prisma migrate deploy`).
+2. Terminer Phase 4 : brancher le journal d'audit sur prix + permissions ; PR + merge ; e2e.
 3. Vérif visuelle de la page `/owner/comparaison` (backend lancé + login partenaire) — jamais faite.
 4. Optionnel : poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 
@@ -58,4 +69,9 @@
 - Backend : login via LocalAuthGuard, pas JWT (traité Phase 1).
 - Frontend : `ignoreBuildErrors` RETIRÉ (build type-checké). Reste ~233 `any` côté `app/`+`hooks/` (traîne Phase 3).
 - Frontend : réponses backend faiblement typées → passer par `lib/raw.ts` (asRecord/asString/asNumber/asArray), pas de `any`.
+- Prisma 5.7 : un `where` sur une relation **to-one** dans un `include` est **silencieusement
+  ignoré** (pas d'erreur) → tout filtrage d'appartenance écrit ainsi est inopérant. Filtrer au
+  niveau requête (`where: { relation: { champ } }`) ou comparer explicitement après chargement.
+- Phase 4 : seam `AuditJournalService.record(tx, …)` (module global) pour journaliser une action
+  sensible DANS sa transaction. Table = `historique`.
 - Règle permanente : aucune trace de Claude/IA dans le git.

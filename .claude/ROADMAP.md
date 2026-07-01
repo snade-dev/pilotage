@@ -14,7 +14,7 @@ sont dans des repos différents et sans dépendance d'ordre.
 | 1 | Sécurité backend | back | ✅ |
 | 2 | Tests « argent » | front + back | ✅ |
 | 3 | Qualité de type | front | ⬜ |
-| 4 | Robustesse données | back | 🔗 en cours |
+| 4 | Robustesse données | back | 🔗 4 lots faits (branche) ; migrations + branchements audit restants |
 | 5 | Dette de duplication | front + back | ⬜ |
 | 6 | Fonctionnalités | front + back | 🔗 stats en cours |
 
@@ -26,10 +26,13 @@ sont dans des repos différents et sans dépendance d'ordre.
 
 ## PHASE 4 — Robustesse des données (backend)
 **But :** intégrité (pas de demi-vente) + zéro fuite entre clients.
-- [ ] Transactions Prisma sur les opérations multi-étapes (vente, remboursement, stock).
-- [ ] Audit d'isolation multi-tenant (chaque requête filtre par établissement), centralisé.
-- [ ] Index DB manquants.
-- [ ] Journal d'audit immuable des actions sensibles.
+- [x] Transactions Prisma sur les opérations multi-étapes (vente, remboursement, stock) — déjà en
+      place ; ajout de l'atomicité ouverture/fermeture de session caisse resto.
+- [x] Audit d'isolation multi-tenant — modèle sain (scope depuis le JWT) ; 1 faille cross-restaurant
+      (POS resto) corrigée.
+- [x] Index DB manquants — migration créée (non déployée).
+- [x] Journal d'audit immuable — `historique` + seam ; branché sur les remboursements.
+- [ ] Reste : brancher l'audit sur prix + permissions + annulation ; déployer les migrations ; merge.
 **Critère de sortie :** opérations atomiques ; isolation vérifiée ; requêtes indexées ; audit en place.
 
 ## PHASE 5 — Dette de duplication (continu)
