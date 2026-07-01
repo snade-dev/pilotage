@@ -13,7 +13,7 @@
 | Module Statistiques (frontend) | front | ✅ mergé sur main |
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
 | 4 Robustesse données | back | ✅ **PR #55 mergée sur main** ; migrations déployées ; reste e2e à passer |
-| 5 Duplication | front + back | 🟡 **back : 4 modules fusionnés + 1 mort supprimé + categories reporté** (branche `refactor/phase-5-dedup-backend`, non mergée) ; front ⬜ |
+| 5 Duplication | front + back | 🟡 **back : 4 modules fusionnés + 1 mort supprimé + categories reporté — MERGÉ sur main (`159348c`)** ; front ⬜ |
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
 ## En cours / en attente
@@ -55,7 +55,7 @@
       traces Phase 4 (scope `etablissementId` + acteur partenaire) — **PR #56 mergée**. Frontend :
       page `/owner/audit-log` (filtre établissement, badges, avant/après lisible) — **mergée sur
       main front (f7f7076)**. Vérif visuelle non faite.
-- [~] Phase 5 Duplication (backend) — branche `refactor/phase-5-dedup-backend` (NON mergée).
+- [x] Phase 5 Duplication (backend) — **mergée sur main (`159348c`, merge --no-ff)**.
       Bases communes `common/*` paramétrées par un `Scope`, sous-classes minces (noms de classe
       conservés = tokens d'injection intacts), tests de caractérisation sur les 2 verticales,
       comportement constant. Fusionnés : **taux-tva** (`12ea3a0`), **fournisseur** (`e198453`),
@@ -65,12 +65,11 @@
       SESSIONS/2026-07-01-phase-5-dedup-backend.md
 
 ## Prochaine action
-1. Relire + merger la branche backend `refactor/phase-5-dedup-backend` sur main.
-2. Phase 5 restante : dédup **frontend** (Supermarché/Restaurant) + éventuelle dédup
+1. Phase 5 restante : dédup **frontend** (Supermarché/Restaurant) + éventuelle dédup
    **contrôleur employes** (asymétrie `forgot-password.dto`, services déjà identiques).
-3. Passer les e2e Phase 4 (écrivent sur BD dev) pour valider bout-en-bout.
-4. Vérif visuelle de `/owner/audit-log` et `/owner/comparaison` (backend lancé + login partenaire).
-5. Poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
+2. Passer les e2e Phase 4 (écrivent sur BD dev) pour valider bout-en-bout.
+3. Vérif visuelle de `/owner/audit-log` et `/owner/comparaison` (backend lancé + login partenaire).
+4. Poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 
 ## Décisions ouvertes / à trancher
 - Le webhook Stripe existe-t-il ? (à confirmer si pas déjà tranché en Phase 1)
