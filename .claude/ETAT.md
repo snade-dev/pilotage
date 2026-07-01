@@ -10,19 +10,13 @@
 | 1 Sécurité | back | ✅ |
 | 2 Tests « argent » | front + back | ✅ |
 | Module Statistiques (backend) | back | ✅ mergé |
-| Module Statistiques (frontend) | front | 🟡 en relecture (branche non mergée) |
+| Module Statistiques (frontend) | front | ✅ mergé sur main |
 | 3 Qualité de type | front | ⬜ à venir (après merge du front stats) |
 | 4 Robustesse données | back | ⬜ prompt prêt, à lancer |
 | 5 Duplication | front + back | ⬜ |
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
 ## En cours / en attente
-- [~] **Page Statistiques Supermarché (front)** — branche `feat/stats-supermarche-frontend`,
-      en attente de relecture. Route `/statistiques-ventes` : KPIs CA net + évolution, courbe
-      recharts, 2 classements complets triables/paginés, export CSV. **Mono-établissement**
-      (bascule consolidé retirée → sera traitée dans le Hub Propriétaire). Filtre par année
-      corrigé (sélecteur d'année quand granularité=année). Typé strict, Vitest vert (23 tests).
-      Voir SESSIONS/2026-07-01-stats-supermarche-frontend.md + 2026-07-01-stats-front-ajustements.md.
 - [ ] ⚠️ **Migration d'index stats backend NON appliquée en base** (`prisma migrate deploy`).
 
 ## Fait (validé + mergé)
@@ -34,12 +28,14 @@
       pagination/tri ; 134 unit + 12 e2e) — SESSIONS/2026-07-01-stats-supermarche.md
 ### Frontend
 - [x] Phase 2 socle Vitest (3 fichiers, 15 tests : totaux document, promotions, TVA)
+- [x] Page Statistiques Supermarché `/statistiques-ventes` (mono-établissement, filtre année
+      corrigé, KPIs CA net, courbe, 2 classements, export CSV, Vitest 23 tests) — mergé sur
+      main (fff0776). SESSIONS/2026-07-01-stats-supermarche-frontend.md + ...-stats-front-ajustements.md
 
 ## Prochaine action
-1. Relire + merger la page stats frontend (`feat/stats-supermarche-frontend`).
-2. Appliquer la migration d'index stats backend en base.
-3. Lancer la Phase 4 backend (chantier parallèle possible pendant la relecture front).
-4. Une fois le front stats mergé → démarrer la Phase 3 (qualité de type) sur le repo front.
+1. Appliquer la migration d'index stats backend en base (`prisma migrate deploy`).
+2. Lancer la Phase 4 backend (robustesse données).
+3. Démarrer la Phase 3 (qualité de type) sur le repo front.
 
 ## Décisions ouvertes / à trancher
 - Le webhook Stripe existe-t-il ? (à confirmer si pas déjà tranché en Phase 1)
