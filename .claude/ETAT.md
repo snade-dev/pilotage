@@ -24,12 +24,6 @@
       multi-courbes. Factorisé depuis `StatsAgregationService`
       (`calculerKpisPeriode` + `getChiffreAffaires`). 139 unit + 16 e2e verts.
       Voir SESSIONS/2026-07-01-stats-comparaison-etablissements.md.
-- [~] **Comparaison des établissements — front** — branche `feat/stats-comparaison-front`
-      poussée (PR à ouvrir). Page `/owner/comparaison` (Hub Propriétaire, entrée nav dédiée) :
-      tableau KPI triable par établissement + export CSV, graphe multi-courbes du CA net
-      (1 ligne/établissement), sélecteur période + granularité mois/année. Consomme l'endpoint
-      backend. Réutilise `StatsControls`, `stats-period`, `csv`, `ChartContainer`. `tsc`/ESLint
-      propres sur les fichiers ajoutés. Voir SESSIONS/2026-07-01-stats-comparaison-front.md.
 - [ ] ⚠️ **Migration d'index stats backend NON appliquée en base** (`prisma migrate deploy`).
 
 ## Fait (validé + mergé)
@@ -47,11 +41,14 @@
 - [x] Phase 3 Qualité de type Lot 0+1 — `ignoreBuildErrors` retiré (build type-checké vert),
       `lib/` 0 `any` (helper `lib/raw.ts`), Vitest 23/23 — mergé sur main (4d79fc9).
       SESSIONS/2026-07-01-phase-3-types.md
+- [x] Page comparaison des établissements `/owner/comparaison` (tableau KPI triable + export CSV,
+      graphe multi-courbes CA net, période + granularité) — mergée sur main (637a355 ; merge
+      re-vérifié type-clean sous le build type-checké Phase 3). SESSIONS/2026-07-01-stats-comparaison-front.md
 
 ## Prochaine action
 1. Appliquer la migration d'index stats backend en base (`prisma migrate deploy`).
 2. Lancer la Phase 4 backend (robustesse données).
-3. Relire/merger `feat/stats-comparaison-front` (page comparaison, hors périmètre Phase 3).
+3. Merger la PR #54 backend (comparaison des établissements) une fois relue.
 4. Optionnel : poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 
 ## Décisions ouvertes / à trancher
