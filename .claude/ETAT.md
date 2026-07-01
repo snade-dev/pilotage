@@ -17,13 +17,6 @@
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
 ## En cours / en attente
-- [~] **Comparaison des établissements — backend** — branche `feat/stats-comparaison-etablissements`
-      poussée, **PR #54 ouverte** (relecture/merge en attente). Endpoint
-      `GET /supermarche/statistiques/comparaison` (protégé `VOIR_RAPPORTS_CONSOLIDES`, borné au
-      propriétaire) : KPIs par établissement + séries temporelles de CA net pour un graphique
-      multi-courbes. Factorisé depuis `StatsAgregationService`
-      (`calculerKpisPeriode` + `getChiffreAffaires`). 139 unit + 16 e2e verts.
-      Voir SESSIONS/2026-07-01-stats-comparaison-etablissements.md.
 - [ ] ⚠️ **Migration d'index stats backend NON appliquée en base** (`prisma migrate deploy`).
 
 ## Fait (validé + mergé)
@@ -33,6 +26,10 @@
 - [x] Phase 2 Tests « argent » (105 unit + 8 e2e guards) — SESSIONS/2026-07-01-phase-2-money.md
 - [x] Module Statistiques agrégation (4 endpoints ; scope établissement/consolidé ; CA net ;
       pagination/tri ; 134 unit + 12 e2e) — SESSIONS/2026-07-01-stats-supermarche.md
+- [x] Comparaison des établissements — endpoint `GET /supermarche/statistiques/comparaison`
+      (protégé `VOIR_RAPPORTS_CONSOLIDES`, borné au propriétaire) : KPIs par établissement +
+      séries de CA net ; factorisé depuis `StatsAgregationService` ; 139 unit + 16 e2e verts —
+      **PR #54 mergée sur main**. SESSIONS/2026-07-01-stats-comparaison-etablissements.md
 ### Frontend
 - [x] Phase 2 socle Vitest (3 fichiers, 15 tests : totaux document, promotions, TVA)
 - [x] Page Statistiques Supermarché `/statistiques-ventes` (mono-établissement, filtre année
@@ -48,7 +45,7 @@
 ## Prochaine action
 1. Appliquer la migration d'index stats backend en base (`prisma migrate deploy`).
 2. Lancer la Phase 4 backend (robustesse données).
-3. Merger la PR #54 backend (comparaison des établissements) une fois relue.
+3. Vérif visuelle de la page `/owner/comparaison` (backend lancé + login partenaire) — jamais faite.
 4. Optionnel : poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 
 ## Décisions ouvertes / à trancher
