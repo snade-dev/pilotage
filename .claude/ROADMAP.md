@@ -31,8 +31,9 @@ sont dans des repos différents et sans dépendance d'ordre.
 - [x] Audit d'isolation multi-tenant — modèle sain (scope depuis le JWT) ; 1 faille cross-restaurant
       (POS resto) corrigée.
 - [x] Index DB manquants — migration créée (non déployée).
-- [x] Journal d'audit immuable — `historique` + seam ; branché sur les remboursements.
-- [ ] Reste : brancher l'audit sur prix + permissions + annulation ; déployer les migrations ; merge.
+- [x] Journal d'audit immuable — `historique` + seam ; branché sur remboursements, prix
+      (produit/plat), permissions (SM/resto), annulation de commande (SM/resto).
+- [ ] Reste : déployer les migrations ; PR + merge ; e2e.
 **Critère de sortie :** opérations atomiques ; isolation vérifiée ; requêtes indexées ; audit en place.
 
 ## PHASE 5 — Dette de duplication (continu)

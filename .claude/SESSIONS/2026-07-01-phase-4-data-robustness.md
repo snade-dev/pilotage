@@ -40,8 +40,14 @@ audit validé (Étape A) puis implémentation lot par lot, suite verte à chaque
   index — additif, aucune donnée perdue). SQL généré par `prisma migrate diff` (pas à la main).
 - À déployer AVEC la migration d'index stats déjà en attente (`prisma migrate deploy`).
 
+## Branchements du journal d'audit (faits après les 4 lots)
+- Remboursements : SM ligne, SM global, resto (dans leur transaction).
+- Modification de prix : produit (SM) et plat (resto) — avant/après des 3 prix, si changement réel.
+- Changement de permissions : rôle SM + resto — remplacement des permissions rendu ATOMIQUE
+  (deleteMany+createMany dans `$transaction`) + trace avant/après.
+- Annulation de commande : passage à `ANNULEE` (SM + resto), dans la transaction du changement de statut.
+
 ## Reste à faire
-- Brancher le journal d'audit sur : annulation de vente, modification de prix produit/plat,
-  changement de permissions/rôles (seam prêt, un `record(tx, …)` par point d'appel).
 - e2e non lancés (écrivent sur la BD dev) : à passer côté opérateur.
+- Déployer les 3 migrations en attente (`prisma migrate deploy`).
 - PR + merge de `feat/phase-4-data-robustness`.

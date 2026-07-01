@@ -12,7 +12,7 @@
 | Module Statistiques (backend) | back | ✅ mergé |
 | Module Statistiques (frontend) | front | ✅ mergé sur main |
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
-| 4 Robustesse données | back | 🟡 4 lots faits sur branche (isolation/tx/index/audit) ; 2 migrations à déployer ; branchements audit prix+permissions restants |
+| 4 Robustesse données | back | 🟡 lots isolation/tx/index/audit faits + audit branché (remb./prix/perms/annulation) ; reste : déployer 2 migrations + PR/merge + e2e |
 | 5 Duplication | front + back | ⬜ |
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
@@ -21,8 +21,8 @@
       `..._add_stats_supermarche_indexes`, `20260701140000_phase4_hot_path_indexes`,
       `20260701150000_phase4_audit_journal` (cette dernière fait un DROP/ADD de la FK
       `historique_utilisateurId_fkey` — additif, aucune donnée perdue).
-- [ ] Phase 4 : brancher le journal d'audit sur annulation de vente, modification de prix
-      (produit/plat), changement de permissions/rôles (seam `AuditJournalService` prêt).
+- [x] Phase 4 : journal d'audit branché sur remboursements (3), modification de prix
+      (produit + plat), changement de permissions (SM + resto), annulation de commande (SM + resto).
 - [ ] Phase 4 : PR + merge de `feat/phase-4-data-robustness` ; e2e à passer (écrivent sur BD dev).
 
 ## Fait (validé + mergé)
