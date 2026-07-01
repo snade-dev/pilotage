@@ -10,41 +10,44 @@
 | 1 Sécurité | back | ✅ |
 | 2 Tests « argent » | front + back | ✅ |
 | Module Statistiques (backend) | back | ✅ mergé |
-| Module Statistiques (frontend) | front | 🔗 en cours (chantier parallèle) |
-| 3 Qualité de type | front | ⬜ à venir (après le front stats) |
-| 4 Robustesse données | back | 🔗 en cours (chantier parallèle) |
+| Module Statistiques (frontend) | front | 🟡 en relecture (branche non mergée) |
+| 3 Qualité de type | front | ⬜ à venir (après merge du front stats) |
+| 4 Robustesse données | back | ⬜ prompt prêt, à lancer |
 | 5 Duplication | front + back | ⬜ |
-| 6 Fonctionnalités | front + back | ⬜ (stats = 1re, en cours) |
+| 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
-## Chantiers actifs EN PARALLÈLE (repos différents → sûrs)
-- [ ] **Frontend Statistiques** (repo FRONT, branche `feat/stats-supermarche-frontend`) :
-      page consommant les 4 endpoints stats. Code neuf typé proprement (pas de nouveau `any`).
-- [ ] **Phase 4 Robustesse données** (repo BACK, branche `feat/phase-4-data-robustness`) :
-      transactions Prisma, audit d'isolation multi-tenant, index, journal d'audit.
+## En cours / en attente
+- [~] **Page Statistiques Supermarché (front)** — branche `feat/stats-supermarche-frontend`,
+      en attente de relecture. Route `/statistiques-ventes` : KPIs CA net + évolution, courbe
+      recharts, 2 classements complets triables/paginés, export CSV. **Mono-établissement**
+      (bascule consolidé retirée → sera traitée dans le Hub Propriétaire). Filtre par année
+      corrigé (sélecteur d'année quand granularité=année). Typé strict, Vitest vert (23 tests).
+      Voir SESSIONS/2026-07-01-stats-supermarche-frontend.md + 2026-07-01-stats-front-ajustements.md.
+- [ ] ⚠️ **Migration d'index stats backend NON appliquée en base** (`prisma migrate deploy`).
 
 ## Fait (validé + mergé)
 ### Backend
-- [x] Phase 0 Hygiène — voir SESSIONS/2026-07-01-phase-0-1.md
-- [x] Phase 1 Sécurité (auth globale, CORS, secrets, throttler, Helmet) — voir SESSIONS/2026-07-01-phase-0-1.md
-- [x] Phase 2 Tests « argent » (105 unit + 8 e2e guards) — voir SESSIONS/2026-07-01-phase-2-money.md
-- [x] Module Statistiques agrégation (4 endpoints : resume, chiffre-affaires,
-      classement-produits, classement-vendeurs ; scope établissement/consolidé, CA net,
-      pagination/tri ; 134 unit + 12 e2e) — voir SESSIONS/2026-07-01-stats-supermarche.md
+- [x] Phase 0 Hygiène — SESSIONS/2026-07-01-phase-0-1.md
+- [x] Phase 1 Sécurité (auth globale, CORS, secrets, throttler, Helmet) — SESSIONS/2026-07-01-phase-0-1.md
+- [x] Phase 2 Tests « argent » (105 unit + 8 e2e guards) — SESSIONS/2026-07-01-phase-2-money.md
+- [x] Module Statistiques agrégation (4 endpoints ; scope établissement/consolidé ; CA net ;
+      pagination/tri ; 134 unit + 12 e2e) — SESSIONS/2026-07-01-stats-supermarche.md
 ### Frontend
 - [x] Phase 2 socle Vitest (3 fichiers, 15 tests : totaux document, promotions, TVA)
 
 ## Prochaine action
-1. (BACK) Appliquer la migration d'index du module stats (`prisma migrate deploy`) — NON FAIT.
-2. Mener en parallèle les deux chantiers actifs ci-dessus.
-3. Une fois le frontend stats mergé → démarrer la Phase 3 (qualité de type) sur le repo front, seul.
+1. Relire + merger la page stats frontend (`feat/stats-supermarche-frontend`).
+2. Appliquer la migration d'index stats backend en base.
+3. Lancer la Phase 4 backend (chantier parallèle possible pendant la relecture front).
+4. Une fois le front stats mergé → démarrer la Phase 3 (qualité de type) sur le repo front.
 
 ## Décisions ouvertes / à trancher
 - Le webhook Stripe existe-t-il ? (à confirmer si pas déjà tranché en Phase 1)
 
 ## Pièges connus
-- Multi-repos : front (Next.js) et back (NestJS) séparés. Ne PAS mener deux chantiers du
-  même repo en parallèle (conflits). Parallèle OK seulement entre repos différents.
-- Migration d'index stats non appliquée en base → endpoints stats lents tant que non déployée.
-- Backend : login via LocalAuthGuard, pas JWT — ne pas casser avec l'auth globale (traité Phase 1).
+- Multi-repos : front et back séparés. Parallèle OK seulement entre repos différents.
+- Ne PAS laisser subsister l'ancien `.claude/` du backend → source de vérité unique = ce repo pilotage.
+- Migration d'index stats non appliquée → endpoints stats lents tant que non déployée.
+- Backend : login via LocalAuthGuard, pas JWT (traité Phase 1).
 - Frontend : `ignoreBuildErrors: true` encore actif + ~247 `any` (chantier Phase 3).
-- Règle permanente : aucune trace de Claude/IA dans le git (commits, auteurs, commentaires).
+- Règle permanente : aucune trace de Claude/IA dans le git.
