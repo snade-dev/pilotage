@@ -51,12 +51,15 @@
       d'audit immuable (`historique`) branché sur remboursements (×3) + prix (produit/plat) +
       permissions (SM/resto) + annulation de commande (SM/resto). Migrations déployées.
       SESSIONS/2026-07-01-phase-4-data-robustness.md
+- [x] Journal d'audit — affichage : backend `GET /owner/audit-log` élargi pour remonter les
+      traces Phase 4 (scope `etablissementId` + acteur partenaire) — **PR #56 mergée**. Frontend :
+      page `/owner/audit-log` (filtre établissement, badges, avant/après lisible) — **mergée sur
+      main front (f7f7076)**. Vérif visuelle non faite.
 
 ## Prochaine action
 1. Passer les e2e Phase 4 (écrivent sur BD dev) pour valider bout-en-bout.
-2. Frontend : afficher le journal d'audit dans l'Owner Hub (la vue lit déjà `historique`, désormais alimenté).
-3. Vérif visuelle de la page `/owner/comparaison` (backend lancé + login partenaire) — jamais faite.
-4. Démarrer Phase 5 (dette de duplication) ou poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
+2. Vérif visuelle de `/owner/audit-log` et `/owner/comparaison` (backend lancé + login partenaire).
+3. Démarrer Phase 5 (dette de duplication) ou poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 
 ## Décisions ouvertes / à trancher
 - Le webhook Stripe existe-t-il ? (à confirmer si pas déjà tranché en Phase 1)
