@@ -15,7 +15,7 @@ sont dans des repos différents et sans dépendance d'ordre.
 | 2 | Tests « argent » | front + back | ✅ |
 | 3 | Qualité de type | front | ⬜ |
 | 4 | Robustesse données | back | ✅ PR #55 mergée ; migrations déployées |
-| 5 | Dette de duplication | front + back | ⬜ |
+| 5 | Dette de duplication | front + back | 🟡 back : 4 fusionnés + 1 mort supprimé + categories reporté (branche à merger) ; front ⬜ |
 | 6 | Fonctionnalités | front + back | 🔗 stats en cours |
 
 ## PHASE 3 — Qualité de type (frontend)
@@ -38,7 +38,11 @@ sont dans des repos différents et sans dépendance d'ordre.
 
 ## PHASE 5 — Dette de duplication (continu)
 **But :** réduire le coût de maintenance Supermarché/Restaurant (front ET back).
-- [ ] Extraire la logique commune + variantes par type d'établissement.
+- [x] Backend : extraire la logique commune + variantes par type via base `common/*` + `Scope`.
+      Fusionnés : taux-tva, fournisseur, employes, code-promo (partiel). Mort supprimé :
+      entite-stock. Reporté (divergence réelle) : categories. Branche à merger.
+- [ ] Backend : dédup contrôleur employes (asymétrie `forgot-password.dto`).
+- [ ] Frontend : extraire la logique commune + variantes par type d'établissement.
 - [ ] Préparer i18n (next-intl) si expansion multi-langue.
 **Critère de sortie :** une correction métier ne se fait plus en double.
 

@@ -13,7 +13,7 @@
 | Module Statistiques (frontend) | front | ✅ mergé sur main |
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
 | 4 Robustesse données | back | ✅ **PR #55 mergée sur main** ; migrations déployées ; reste e2e à passer |
-| 5 Duplication | front + back | ⬜ |
+| 5 Duplication | front + back | 🟡 **back : 4 modules fusionnés + 1 mort supprimé + categories reporté** (branche `refactor/phase-5-dedup-backend`, non mergée) ; front ⬜ |
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
 ## En cours / en attente
@@ -55,11 +55,22 @@
       traces Phase 4 (scope `etablissementId` + acteur partenaire) — **PR #56 mergée**. Frontend :
       page `/owner/audit-log` (filtre établissement, badges, avant/après lisible) — **mergée sur
       main front (f7f7076)**. Vérif visuelle non faite.
+- [~] Phase 5 Duplication (backend) — branche `refactor/phase-5-dedup-backend` (NON mergée).
+      Bases communes `common/*` paramétrées par un `Scope`, sous-classes minces (noms de classe
+      conservés = tokens d'injection intacts), tests de caractérisation sur les 2 verticales,
+      comportement constant. Fusionnés : **taux-tva** (`12ea3a0`), **fournisseur** (`e198453`),
+      **employes** (`c461e00`) ; **code-promo** en fusion partielle (`f5b7679`, seules les 6
+      méthodes discriminant-only) ; **entite-stock** mort supprimé (`fd306e2`). **categories
+      reporté** (divergence métier réelle, voir session). 18 suites / 216 tests verts.
+      SESSIONS/2026-07-01-phase-5-dedup-backend.md
 
 ## Prochaine action
-1. Passer les e2e Phase 4 (écrivent sur BD dev) pour valider bout-en-bout.
-2. Vérif visuelle de `/owner/audit-log` et `/owner/comparaison` (backend lancé + login partenaire).
-3. Démarrer Phase 5 (dette de duplication) ou poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
+1. Relire + merger la branche backend `refactor/phase-5-dedup-backend` sur main.
+2. Phase 5 restante : dédup **frontend** (Supermarché/Restaurant) + éventuelle dédup
+   **contrôleur employes** (asymétrie `forgot-password.dto`, services déjà identiques).
+3. Passer les e2e Phase 4 (écrivent sur BD dev) pour valider bout-en-bout.
+4. Vérif visuelle de `/owner/audit-log` et `/owner/comparaison` (backend lancé + login partenaire).
+5. Poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 
 ## Décisions ouvertes / à trancher
 - Le webhook Stripe existe-t-il ? (à confirmer si pas déjà tranché en Phase 1)
@@ -76,4 +87,9 @@
   niveau requête (`where: { relation: { champ } }`) ou comparer explicitement après chargement.
 - Phase 4 : seam `AuditJournalService.record(tx, …)` (module global) pour journaliser une action
   sensible DANS sa transaction. Table = `historique`.
+- Phase 5 : `categories` (SM/resto) NE se fusionne PAS — divergence métier réelle (SM plus
+  riche : `includeInactive`, `userId`, `reorder`, `toggle` ; signatures + corps différents).
+  Reporté volontairement, ne pas re-tenter sans refonte.
+- Phase 5 : patron de dédup = base abstraite `common/<module>/` + objet `Scope` (discriminant) +
+  sous-classes minces gardant leur nom de classe (token d'injection). Réutiliser ce patron.
 - Règle permanente : aucune trace de Claude/IA dans le git.
