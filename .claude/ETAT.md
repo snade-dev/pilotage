@@ -17,6 +17,12 @@
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
 ## En cours / en attente
+- [~] **Comparaison des établissements (backend)** — branche `feat/stats-comparaison-etablissements`,
+      en attente de relecture (non commitée). Endpoint `GET /supermarche/statistiques/comparaison`
+      (protégé `VOIR_RAPPORTS_CONSOLIDES`, borné au propriétaire) : KPIs par établissement +
+      séries temporelles de CA net pour un graphique multi-courbes. Factorisé depuis
+      `StatsAgregationService` (`calculerKpisPeriode` + `getChiffreAffaires`). 139 unit + 16 e2e verts.
+      Voir SESSIONS/2026-07-01-stats-comparaison-etablissements.md.
 - [ ] ⚠️ **Migration d'index stats backend NON appliquée en base** (`prisma migrate deploy`).
 
 ## Fait (validé + mergé)
