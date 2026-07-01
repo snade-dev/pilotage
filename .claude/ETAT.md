@@ -12,18 +12,16 @@
 | Module Statistiques (backend) | back | ✅ mergé |
 | Module Statistiques (frontend) | front | ✅ mergé sur main |
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
-| 4 Robustesse données | back | 🟡 lots isolation/tx/index/audit faits + audit branché (remb./prix/perms/annulation) ; reste : déployer 2 migrations + PR/merge + e2e |
+| 4 Robustesse données | back | ✅ **PR #55 mergée sur main** ; migrations déployées ; reste e2e à passer |
 | 5 Duplication | front + back | ⬜ |
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
 ## En cours / en attente
-- [ ] ⚠️ **3 migrations backend NON appliquées en base** (`prisma migrate deploy`), à déployer ensemble :
-      `..._add_stats_supermarche_indexes`, `20260701140000_phase4_hot_path_indexes`,
-      `20260701150000_phase4_audit_journal` (cette dernière fait un DROP/ADD de la FK
-      `historique_utilisateurId_fkey` — additif, aucune donnée perdue).
+- [x] Migrations backend déployées (stats + `phase4_hot_path_indexes` + `phase4_audit_journal`).
 - [x] Phase 4 : journal d'audit branché sur remboursements (3), modification de prix
       (produit + plat), changement de permissions (SM + resto), annulation de commande (SM + resto).
-- [ ] Phase 4 : PR + merge de `feat/phase-4-data-robustness` ; e2e à passer (écrivent sur BD dev).
+- [x] Phase 4 : PR #55 mergée sur main.
+- [ ] Phase 4 : e2e à passer (écrivent sur BD dev).
 
 ## Fait (validé + mergé)
 ### Backend
@@ -47,17 +45,18 @@
 - [x] Page comparaison des établissements `/owner/comparaison` (tableau KPI triable + export CSV,
       graphe multi-courbes CA net, période + granularité) — mergée sur main (637a355 ; merge
       re-vérifié type-clean sous le build type-checké Phase 3). SESSIONS/2026-07-01-stats-comparaison-front.md
-- [x] Phase 4 Robustesse données — 4 lots sur `feat/phase-4-data-robustness` (146 unit verts) :
-      B1 isolation (faille cross-restaurant POS resto CONFIRMÉE + corrigée : `where` sur relation
-      to-one `plat` ignoré par Prisma 5.7), B2 atomicité session caisse resto, B3 index hot paths,
-      B4 journal d'audit immuable (`historique`) branché sur les 3 remboursements.
+- [x] Phase 4 Robustesse données — **PR #55 mergée sur main** (146 unit verts) : B1 isolation
+      (faille cross-restaurant POS resto CONFIRMÉE + corrigée : `where` sur relation to-one `plat`
+      ignoré par Prisma 5.7), B2 atomicité session caisse resto, B3 index hot paths, B4 journal
+      d'audit immuable (`historique`) branché sur remboursements (×3) + prix (produit/plat) +
+      permissions (SM/resto) + annulation de commande (SM/resto). Migrations déployées.
       SESSIONS/2026-07-01-phase-4-data-robustness.md
 
 ## Prochaine action
-1. Déployer les 3 migrations backend en attente (`prisma migrate deploy`).
-2. Terminer Phase 4 : brancher le journal d'audit sur prix + permissions ; PR + merge ; e2e.
+1. Passer les e2e Phase 4 (écrivent sur BD dev) pour valider bout-en-bout.
+2. Frontend : afficher le journal d'audit dans l'Owner Hub (la vue lit déjà `historique`, désormais alimenté).
 3. Vérif visuelle de la page `/owner/comparaison` (backend lancé + login partenaire) — jamais faite.
-4. Optionnel : poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
+4. Démarrer Phase 5 (dette de duplication) ou poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 
 ## Décisions ouvertes / à trancher
 - Le webhook Stripe existe-t-il ? (à confirmer si pas déjà tranché en Phase 1)

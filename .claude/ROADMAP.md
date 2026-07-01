@@ -14,7 +14,7 @@ sont dans des repos différents et sans dépendance d'ordre.
 | 1 | Sécurité backend | back | ✅ |
 | 2 | Tests « argent » | front + back | ✅ |
 | 3 | Qualité de type | front | ⬜ |
-| 4 | Robustesse données | back | 🔗 4 lots faits (branche) ; migrations + branchements audit restants |
+| 4 | Robustesse données | back | ✅ PR #55 mergée ; migrations déployées |
 | 5 | Dette de duplication | front + back | ⬜ |
 | 6 | Fonctionnalités | front + back | 🔗 stats en cours |
 
@@ -33,8 +33,8 @@ sont dans des repos différents et sans dépendance d'ordre.
 - [x] Index DB manquants — migration créée (non déployée).
 - [x] Journal d'audit immuable — `historique` + seam ; branché sur remboursements, prix
       (produit/plat), permissions (SM/resto), annulation de commande (SM/resto).
-- [ ] Reste : déployer les migrations ; PR + merge ; e2e.
-**Critère de sortie :** opérations atomiques ; isolation vérifiée ; requêtes indexées ; audit en place.
+- [x] PR #55 mergée sur main ; migrations déployées. Reste : e2e à passer.
+**Critère de sortie :** opérations atomiques ; isolation vérifiée ; requêtes indexées ; audit en place. ✅
 
 ## PHASE 5 — Dette de duplication (continu)
 **But :** réduire le coût de maintenance Supermarché/Restaurant (front ET back).
