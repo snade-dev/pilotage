@@ -11,7 +11,7 @@
 | 2 Tests « argent » | front + back | ✅ |
 | Module Statistiques (backend) | back | ✅ mergé |
 | Module Statistiques (frontend) | front | ✅ mergé sur main |
-| 3 Qualité de type | front | 🟡 Lot 0+1 faits (build protégé, lib/ 0 any) — branche non mergée |
+| 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
 | 4 Robustesse données | back | ⬜ prompt prêt, à lancer |
 | 5 Duplication | front + back | ⬜ |
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
@@ -23,12 +23,6 @@
       séries temporelles de CA net pour un graphique multi-courbes. Factorisé depuis
       `StatsAgregationService` (`calculerKpisPeriode` + `getChiffreAffaires`). 139 unit + 16 e2e verts.
       Voir SESSIONS/2026-07-01-stats-comparaison-etablissements.md.
-- [~] **Phase 3 Qualité de type (front)** — branche `chore/phase-3-types`, en attente de
-      relecture. Lot 0 : 34 erreurs `tsc` corrigées par cause racine → `ignoreBuildErrors`
-      RETIRÉ, `next build` vert avec type-check actif. Lot 1 : `lib/` passé de 82 à 0
-      `: any`/`as any` (helper `lib/raw.ts` de lecture sûre des réponses backend). Vitest 23/23.
-      Reste (traîne à traiter à part) : ~178 `any` dans `app/`, ~55 dans `hooks/`.
-      Voir SESSIONS/2026-07-01-phase-3-types.md.
 - [ ] ⚠️ **Migration d'index stats backend NON appliquée en base** (`prisma migrate deploy`).
 
 ## Fait (validé + mergé)
@@ -43,11 +37,14 @@
 - [x] Page Statistiques Supermarché `/statistiques-ventes` (mono-établissement, filtre année
       corrigé, KPIs CA net, courbe, 2 classements, export CSV, Vitest 23 tests) — mergé sur
       main (fff0776). SESSIONS/2026-07-01-stats-supermarche-frontend.md + ...-stats-front-ajustements.md
+- [x] Phase 3 Qualité de type Lot 0+1 — `ignoreBuildErrors` retiré (build type-checké vert),
+      `lib/` 0 `any` (helper `lib/raw.ts`), Vitest 23/23 — mergé sur main (4d79fc9).
+      SESSIONS/2026-07-01-phase-3-types.md
 
 ## Prochaine action
-1. Relire + merger `chore/phase-3-types` (front) — Lot 0+1 faits, build vert.
-2. Appliquer la migration d'index stats backend en base (`prisma migrate deploy`).
-3. Lancer la Phase 4 backend (robustesse données).
+1. Appliquer la migration d'index stats backend en base (`prisma migrate deploy`).
+2. Lancer la Phase 4 backend (robustesse données).
+3. Relire/merger `feat/stats-comparaison-front` (page comparaison, hors périmètre Phase 3).
 4. Optionnel : poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 
 ## Décisions ouvertes / à trancher
