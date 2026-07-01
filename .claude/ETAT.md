@@ -11,7 +11,7 @@
 | 2 Tests « argent » | front + back | ✅ |
 | Module Statistiques (backend) | back | ✅ mergé |
 | Module Statistiques (frontend) | front | ✅ mergé sur main |
-| 3 Qualité de type | front | ⬜ à venir (après merge du front stats) |
+| 3 Qualité de type | front | 🟡 Lot 0+1 faits (build protégé, lib/ 0 any) — branche non mergée |
 | 4 Robustesse données | back | ⬜ prompt prêt, à lancer |
 | 5 Duplication | front + back | ⬜ |
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
@@ -23,6 +23,12 @@
       séries temporelles de CA net pour un graphique multi-courbes. Factorisé depuis
       `StatsAgregationService` (`calculerKpisPeriode` + `getChiffreAffaires`). 139 unit + 16 e2e verts.
       Voir SESSIONS/2026-07-01-stats-comparaison-etablissements.md.
+- [~] **Phase 3 Qualité de type (front)** — branche `chore/phase-3-types`, en attente de
+      relecture. Lot 0 : 34 erreurs `tsc` corrigées par cause racine → `ignoreBuildErrors`
+      RETIRÉ, `next build` vert avec type-check actif. Lot 1 : `lib/` passé de 82 à 0
+      `: any`/`as any` (helper `lib/raw.ts` de lecture sûre des réponses backend). Vitest 23/23.
+      Reste (traîne à traiter à part) : ~178 `any` dans `app/`, ~55 dans `hooks/`.
+      Voir SESSIONS/2026-07-01-phase-3-types.md.
 - [ ] ⚠️ **Migration d'index stats backend NON appliquée en base** (`prisma migrate deploy`).
 
 ## Fait (validé + mergé)
@@ -39,9 +45,10 @@
       main (fff0776). SESSIONS/2026-07-01-stats-supermarche-frontend.md + ...-stats-front-ajustements.md
 
 ## Prochaine action
-1. Appliquer la migration d'index stats backend en base (`prisma migrate deploy`).
-2. Lancer la Phase 4 backend (robustesse données).
-3. Démarrer la Phase 3 (qualité de type) sur le repo front.
+1. Relire + merger `chore/phase-3-types` (front) — Lot 0+1 faits, build vert.
+2. Appliquer la migration d'index stats backend en base (`prisma migrate deploy`).
+3. Lancer la Phase 4 backend (robustesse données).
+4. Optionnel : poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 
 ## Décisions ouvertes / à trancher
 - Le webhook Stripe existe-t-il ? (à confirmer si pas déjà tranché en Phase 1)
@@ -51,5 +58,6 @@
 - Ne PAS laisser subsister l'ancien `.claude/` du backend → source de vérité unique = ce repo pilotage.
 - Migration d'index stats non appliquée → endpoints stats lents tant que non déployée.
 - Backend : login via LocalAuthGuard, pas JWT (traité Phase 1).
-- Frontend : `ignoreBuildErrors: true` encore actif + ~247 `any` (chantier Phase 3).
+- Frontend : `ignoreBuildErrors` RETIRÉ (build type-checké). Reste ~233 `any` côté `app/`+`hooks/` (traîne Phase 3).
+- Frontend : réponses backend faiblement typées → passer par `lib/raw.ts` (asRecord/asString/asNumber/asArray), pas de `any`.
 - Règle permanente : aucune trace de Claude/IA dans le git.
