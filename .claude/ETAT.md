@@ -14,19 +14,20 @@
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
 | 4 Robustesse données | back | ✅ **PR #55 mergée** ; migrations déployées ; **e2e-BD Phase 4 verts** (isolation/atomicité/audit, branche `test/phase-4-e2e`) |
 | 5 Duplication | front + back | 🟡 **back MERGÉ (`159348c`)** : 4 fusionnés + 1 mort + categories reporté · **front MERGÉ (`8ae73ca`)** : fournisseur (data+hooks) fusionné, 6 autres paires reportées (divergence réelle) |
-| 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline code+e2e complet** (O0→O2c, e2e-BD 14/14) en attente merge PR #57 + PR front |
+| 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline back MERGÉ** (PR #57, `f50124c`) — reste PR front · **M1 images** back en revue (PR #58) |
 
 ## En cours / en attente
-- [~] **M1 (app client) — stockage d'images (backend)** : branche `feat/m1-image-storage`
-      (NON commitée, en relecture). Interface abstraite `ImageStorageService` + impl **dossier
+- [~] **M1 (app client) — stockage d'images (backend)** : commité `f295c0d` sur branche
+      `feat/m1-image-storage`, poussée, **PR #58 ouverte** (base main). Interface abstraite
+      `ImageStorageService` + impl **dossier
       local** (`common/image-storage/`, `@Global`) + miniatures `sharp` (thumb 200² / display
       800px webp) + service statique `/media` (`useStaticAssets`). Bascule des créations produit
       SM + plat resto via un **service commun** `persistImages` (patron Phase 5, zéro dup).
       Migration base64→fichiers **livrée mais NON exécutée** (fonction pure idempotente + commande
       `scripts/migrate-images.ts` dry-run par défaut). Tests : **unit 241/241**, **e2e-BD 17/17**
-      (dry-run sans effet / conversion réelle / idempotence). Reste : relecture, exécution
-      migration à part (après validation), vérif visuelle front (mix base64+URLs en transition).
-      SESSIONS/2026-07-02-m1-image-storage.md
+      (dry-run sans effet / conversion réelle / idempotence). Reste : relecture + merge PR #58,
+      exécution migration à part (après validation), vérif visuelle front (mix base64+URLs en
+      transition). SESSIONS/2026-07-02-m1-image-storage.md
 - [~] **Phase 6 — Mode offline robuste du POS** : CODE + E2E COMPLETS (O0→O2c), en attente de
       merge (PR #57 back + PR front à ouvrir). O3 multi-caisses optionnel. Détail des jalons :
       O0 conception + O1 fait (front).
@@ -64,9 +65,9 @@
       double effet (rejeu ×2 = 1 commande + 1 mouvement), écart (survente → stock négatif +
       `ECART_STOCK_OFFLINE` dans historique), échec partiel (lot [valide, invalide] →
       APPLIED/REJECTED). Fixtures session POS SM ouverte + moyen de paiement ajoutées.
-      **PR** : backend `Nagtic-co/all-in-one-backend#57` (à jour) ; front branche
-      `feature/pos-offline-o1` poussée, PR à ouvrir à la main (gh non collaborateur du repo front).
-      **Reste** : ouvrir PR front ; O3 multi-caisses durci (preuve concurrente).
+      **PR** : backend **#57 MERGÉE sur main** (`f50124c`) ; front branche `feature/pos-offline-o1`
+      poussée, PR à ouvrir à la main (gh non collaborateur du repo front).
+      **Reste** : ouvrir + merger PR front ; O3 multi-caisses durci (preuve concurrente).
       SESSIONS/2026-07-02-pos-offline-design.md
 - [x] Migrations backend déployées (stats + `phase4_hot_path_indexes` + `phase4_audit_journal`).
 - [x] Phase 4 : journal d'audit branché sur remboursements (3), modification de prix
@@ -126,10 +127,12 @@
       SESSIONS/2026-07-01-phase-5-dedup-backend.md
 
 ## Prochaine action
-1. **POS offline** : relire + merger **PR #57** (back `feature/pos-offline-o2-stock-seam`,
-   `pnpm test:e2e:db` = 14/14). Ouvrir + merger la **PR front** (`feature/pos-offline-o1`,
-   compare main...feature/pos-offline-o1) — à faire à la main (gh non collaborateur du repo front).
-2. Relire + merger `test/phase-4-e2e` (e2e-BD Phase 4). Relancer via `pnpm test:e2e:db` (Docker requis).
+1. **M1 images** : relire + merger **PR #58** (back `feat/m1-image-storage`, unit 241/241 +
+   e2e-BD 17/17). Puis exécuter la migration base64→fichiers **à part** (e2e-BD → `--dry-run`
+   sur copie → `--confirm`) + vérif visuelle front (mix base64+URLs).
+2. **POS offline** : #57 mergée. Ouvrir + merger la **PR front** (`feature/pos-offline-o1`,
+   compare main...feature/pos-offline-o1) — à la main (gh non collaborateur du repo front).
+3. Relire + merger `test/phase-4-e2e` (e2e-BD Phase 4). Relancer via `pnpm test:e2e:db` (Docker requis).
 3. Vérif visuelle de `/owner/audit-log` et `/owner/comparaison` (backend lancé + login partenaire).
 4. Poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 5. (Phase 5) reprise des paires front reportées seulement si une vérif visuelle / e2e front
