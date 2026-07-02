@@ -17,6 +17,16 @@
 | 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline code+e2e complet** (O0→O2c, e2e-BD 14/14) en attente merge PR #57 + PR front |
 
 ## En cours / en attente
+- [~] **M1 (app client) — stockage d'images (backend)** : branche `feat/m1-image-storage`
+      (NON commitée, en relecture). Interface abstraite `ImageStorageService` + impl **dossier
+      local** (`common/image-storage/`, `@Global`) + miniatures `sharp` (thumb 200² / display
+      800px webp) + service statique `/media` (`useStaticAssets`). Bascule des créations produit
+      SM + plat resto via un **service commun** `persistImages` (patron Phase 5, zéro dup).
+      Migration base64→fichiers **livrée mais NON exécutée** (fonction pure idempotente + commande
+      `scripts/migrate-images.ts` dry-run par défaut). Tests : **unit 241/241**, **e2e-BD 17/17**
+      (dry-run sans effet / conversion réelle / idempotence). Reste : relecture, exécution
+      migration à part (après validation), vérif visuelle front (mix base64+URLs en transition).
+      SESSIONS/2026-07-02-m1-image-storage.md
 - [~] **Phase 6 — Mode offline robuste du POS** : CODE + E2E COMPLETS (O0→O2c), en attente de
       merge (PR #57 back + PR front à ouvrir). O3 multi-caisses optionnel. Détail des jalons :
       O0 conception + O1 fait (front).
