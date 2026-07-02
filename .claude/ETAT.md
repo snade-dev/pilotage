@@ -14,10 +14,12 @@
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
 | 4 Robustesse données | back | ✅ **PR #55 mergée** ; migrations déployées ; **e2e-BD Phase 4 verts** (isolation/atomicité/audit, branche `test/phase-4-e2e`) |
 | 5 Duplication | front + back | 🟡 **back MERGÉ (`159348c`)** : 4 fusionnés + 1 mort + categories reporté · **front MERGÉ (`8ae73ca`)** : fournisseur (data+hooks) fusionné, 6 autres paires reportées (divergence réelle) |
-| 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
+| 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline code+e2e complet** (O0→O2c, e2e-BD 14/14) en attente merge PR #57 + PR front |
 
 ## En cours / en attente
-- [~] **Phase 6 — Mode offline robuste du POS** : O0 conception + O1 fait (front).
+- [~] **Phase 6 — Mode offline robuste du POS** : CODE + E2E COMPLETS (O0→O2c), en attente de
+      merge (PR #57 back + PR front à ouvrir). O3 multi-caisses optionnel. Détail des jalons :
+      O0 conception + O1 fait (front).
       Design : `.claude/DESIGN/2026-07-02-pos-offline-sync.md`. Décision cadre actée dans
       DECISIONS.md (2026-07-02). Cadre : file d'opérations idempotentes (opId=UUID caisse →
       `clientRequestId`), stock négatif toléré au rejeu + alerte `ECART_STOCK_OFFLINE`, en
@@ -114,11 +116,15 @@
       SESSIONS/2026-07-01-phase-5-dedup-backend.md
 
 ## Prochaine action
-1. Relire + merger `test/phase-4-e2e` (e2e-BD Phase 4). Relancer via `pnpm test:e2e:db` (Docker requis).
-2. Vérif visuelle de `/owner/audit-log` et `/owner/comparaison` (backend lancé + login partenaire).
-3. Poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
-4. (Phase 5) reprise des paires front reportées seulement si une vérif visuelle / e2e front
+1. **POS offline** : relire + merger **PR #57** (back `feature/pos-offline-o2-stock-seam`,
+   `pnpm test:e2e:db` = 14/14). Ouvrir + merger la **PR front** (`feature/pos-offline-o1`,
+   compare main...feature/pos-offline-o1) — à faire à la main (gh non collaborateur du repo front).
+2. Relire + merger `test/phase-4-e2e` (e2e-BD Phase 4). Relancer via `pnpm test:e2e:db` (Docker requis).
+3. Vérif visuelle de `/owner/audit-log` et `/owner/comparaison` (backend lancé + login partenaire).
+4. Poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
+5. (Phase 5) reprise des paires front reportées seulement si une vérif visuelle / e2e front
    est en place. Contrôleur employes : écarté (voir ci-dessus), ne pas re-tenter.
+6. (POS offline) O3 multi-caisses durci — optionnel, surtout de la preuve concurrente e2e.
 
 ## Décisions ouvertes / à trancher
 - Le webhook Stripe existe-t-il ? (à confirmer si pas déjà tranché en Phase 1)
