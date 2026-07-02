@@ -22,10 +22,15 @@
       local** (`common/image-storage/`, `@Global`) + miniatures `sharp` (thumb 200² / display
       800px webp) + service statique `/media` (`useStaticAssets`). Bascule des créations produit
       SM + plat resto via un **service commun** `persistImages` (patron Phase 5, zéro dup).
-      Migration base64→fichiers **livrée mais NON exécutée** (fonction pure idempotente + commande
-      `scripts/migrate-images.ts` dry-run par défaut). Tests : **unit 241/241**, **e2e-BD 17/17**.
-      **Reste** : exécuter la migration à part (après validation : e2e-BD → `--dry-run` sur copie →
-      `--confirm`), vérif visuelle front (mix base64+URLs en transition).
+      Tests : **unit 241/241**, **e2e-BD 17/17**.
+      **Migration base64→fichiers EXÉCUTÉE sur la base dev `aio` (2026-07-02)** : dump de sauvegarde
+      `scripts/backup/aio-full-*.sql` (3,1 Mo) + dry-run + `--confirm` → **9 images converties**
+      (4 produits + 1 plat + 4 variantes), 0 base64 restant, 18 fichiers webp dans `uploads/`,
+      backup JSON des valeurs d'origine. Validée d'abord sur **copie jetable** `aio_migration_copy`
+      (supprimée après). **Correctif runner PR #59** : le script plantait tel que documenté
+      (`sharp` + `esModuleInterop` off) → `scripts/tsconfig.migrate.json` + script `pnpm
+      migrate:images`. **Reste** : merger PR #59, vérif visuelle front (URLs relatives `/media`,
+      voir si besoin `PUBLIC_MEDIA_BASE_URL` absolue pour l'app desktop/front).
       SESSIONS/2026-07-02-m1-image-storage.md
 - [~] **Phase 6 — Mode offline robuste du POS** : CODE + E2E COMPLETS (O0→O2c), en attente de
       merge (PR #57 back + PR front à ouvrir). O3 multi-caisses optionnel. Détail des jalons :
@@ -126,8 +131,10 @@
       SESSIONS/2026-07-01-phase-5-dedup-backend.md
 
 ## Prochaine action
-1. **M1 images** : PR #58 mergée (`6de2bfb`). Reste : exécuter la migration base64→fichiers
-   **à part** (e2e-BD → `--dry-run` sur copie → `--confirm`) + vérif visuelle front (mix base64+URLs).
+1. **M1 images** : PR #58 mergée (`6de2bfb`) ; **migration base64→fichiers EXÉCUTÉE sur `aio`**
+   (9 images, backup fait). Reste : merger **PR #59** (correctif runner) + vérif visuelle front
+   (URLs `/media` relatives ; trancher `PUBLIC_MEDIA_BASE_URL` absolue si le front/desktop charge
+   les images hors proxy).
 2. **POS offline** : #57 mergée. Ouvrir + merger la **PR front** (`feature/pos-offline-o1`,
    compare main...feature/pos-offline-o1) — à la main (gh non collaborateur du repo front).
 3. Relire + merger `test/phase-4-e2e` (e2e-BD Phase 4). Relancer via `pnpm test:e2e:db` (Docker requis).
@@ -168,3 +175,9 @@
   Garde-fou `setup-env.ts` : refuse de tourner sans `TEST_DATABASE_URL` et refuse `aio`. Ne JAMAIS
   faire écrire les e2e sur la BD dev.
 - Règle permanente : aucune trace de Claude/IA dans le git.
+- **Base dev `aio`** : tourne dans Docker → conteneur **`aio-db`** (`postgres:17-bookworm`, glibc 2.36
+  pour matcher le volume, sinon avertissement/blocage de collation), port **5432**, volume
+  `70225bc2a0ae…`. Restaurée le 2026-07-02 après qu'un `docker rm` à filtre large a retiré l'ancien
+  conteneur (données saines dans le volume). **RÈGLE ABSOLUE** : jamais de `docker rm/prune/volume rm`
+  sur filtre large (`name=aio`, `$(docker ps -aq…)`), jamais de suppression conteneur/volume/base
+  sans demande explicite. Nettoyage e2e = uniquement le nom exact `aio-e2e-pg`.
