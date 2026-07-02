@@ -15,7 +15,7 @@ sont dans des repos différents et sans dépendance d'ordre.
 | 2 | Tests « argent » | front + back | ✅ |
 | 3 | Qualité de type | front | ⬜ |
 | 4 | Robustesse données | back | ✅ PR #55 mergée ; migrations déployées |
-| 5 | Dette de duplication | front + back | 🟡 back mergé sur main (4 fusionnés + 1 mort supprimé + categories reporté) ; front ⬜ |
+| 5 | Dette de duplication | front + back | 🟡 back mergé (4 fusionnés + 1 mort + categories reporté) ; front mergé (fournisseur fusionné, 6 paires reportées) |
 | 6 | Fonctionnalités | front + back | 🔗 stats en cours |
 
 ## PHASE 3 — Qualité de type (frontend)
@@ -42,7 +42,8 @@ sont dans des repos différents et sans dépendance d'ordre.
       Fusionnés : taux-tva, fournisseur, employes, code-promo (partiel). Mort supprimé :
       entite-stock. Reporté (divergence réelle) : categories. **Mergé sur main (`159348c`).**
 - [ ] Backend : dédup contrôleur employes (asymétrie `forgot-password.dto`).
-- [ ] Frontend : extraire la logique commune + variantes par type d'établissement.
+- [x] Frontend : fabriques data+hooks + variantes par scope. Fait : fournisseur (mergé `8ae73ca`).
+      Reporté (divergence réelle) : produits, inventaire, dashboard, orders, statistics, promotions.
 - [ ] Préparer i18n (next-intl) si expansion multi-langue.
 **Critère de sortie :** une correction métier ne se fait plus en double.
 
