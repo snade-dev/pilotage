@@ -147,9 +147,24 @@ Le harnais e2e-db (Phase 4) est bien sur `main`. Ajouté sous `test/e2e-db/` :
   `snade-dev/all-in-one`, mais `gh pr create` refusé (compte non collaborateur du repo front).
   Ouvrir à la main : https://github.com/snade-dev/all-in-one/compare/main...feature/pos-offline-o1?expand=1
 
+## e2e-BD bout-en-bout — activés + verts (2026-07-02, commit back 46123a5, poussé)
+Docker désormais dispo. `pnpm test:e2e:db` = **14/14 verts, 0 skip** (base jetable `aio_e2e`,
+garde-fou `setup-env.ts` intact).
+- Nouveau `test/e2e-db/pos-offline-sync.db-e2e-spec.ts` (traverse `PosSessionService.syncOperations`) :
+  1. **Double effet** : même `clientRequestId` rejoué 2× → 1 commande, 1 mouvement de stock
+     (idempotence bout-en-bout, pas juste la contrainte DB).
+  2. **Écart** : survente au rejeu (stock 1, vend 3) → `stockNegatif=true`, variante à −2,
+     ligne `historique` `ECART_STOCK_OFFLINE` (entité Variante, etablissementId=SM).
+  3. **Échec partiel** : lot [valide, variante inexistante] → `[APPLIED, REJECTED]`, la valide
+     crée sa commande, l'invalide non.
+- Fixtures ajoutées (`fixtures.ts`) : `createPosSessionSupermarche` (session ouverte) +
+  `createMoyenPaiementPOS` (type + config active). Bloc `describe.skip` de
+  `pos-offline-idempotence` retiré (déplacé).
+- **Aucun bug réel détecté** : les 3 garanties tiennent contre le vrai Postgres.
+
 ## En attente
-- **Exécuter les e2e-BD** (Docker) : les 2 specs actifs + finaliser les 3 scénarios skippés.
-- **Ouvrir le PR front** manuellement (permissions gh).
+- **Ouvrir le PR front** manuellement (permissions gh) :
+  https://github.com/snade-dev/all-in-one/compare/main...feature/pos-offline-o1?expand=1
 - **O3** multi-caisses durci : concurrence (décréments SM déjà atomiques ; prouver par e2e
   concurrents), tableau d'écarts par caisse. (périmètre resto, remboursement offline, delta
   atomique, numérotation reçus, unitaire vs batch, expiration d'op, session offline,

@@ -46,14 +46,16 @@
       (toast si `stockNegatif`, à régulariser par ajustement) + refus `REJECTED` rendu terminal
       dans la file (`markSaleRejected`, retries=MAX, plus de retry auto) ; transitoires toujours
       retentés. 30/30 front, tsc propre.
-      **e2e-BD** : squelettes ajoutés (back f43337f) — `pos-offline-stock` (seam TOLERATE/STRICT
-      vrai PG) + `pos-offline-idempotence` (clientRequestId P2002) + flux complet skippé ;
-      typecheck OK, NON exécutés (Docker Desktop absent). **PR** : backend
-      `Nagtic-co/all-in-one-backend#57` ouverte ; front branche `feature/pos-offline-o1` poussée
-      mais PR à ouvrir à la main (gh non collaborateur du repo front) :
-      compare main...feature/pos-offline-o1.
-      **Reste** : lancer `pnpm test:e2e:db` sous Docker + finaliser 3 scénarios skippés ; ouvrir
-      PR front ; O3 multi-caisses durci. SESSIONS/2026-07-02-pos-offline-design.md
+      **e2e-BD FAIT (back 46123a5, poussé PR #57)** : exécutés sous Docker → **14/14 verts,
+      0 skip**. `pos-offline-stock` (seam TOLERATE/STRICT vrai PG) + `pos-offline-idempotence`
+      (clientRequestId P2002) + **`pos-offline-sync` bout-en-bout** (via `syncOperations`) :
+      double effet (rejeu ×2 = 1 commande + 1 mouvement), écart (survente → stock négatif +
+      `ECART_STOCK_OFFLINE` dans historique), échec partiel (lot [valide, invalide] →
+      APPLIED/REJECTED). Fixtures session POS SM ouverte + moyen de paiement ajoutées.
+      **PR** : backend `Nagtic-co/all-in-one-backend#57` (à jour) ; front branche
+      `feature/pos-offline-o1` poussée, PR à ouvrir à la main (gh non collaborateur du repo front).
+      **Reste** : ouvrir PR front ; O3 multi-caisses durci (preuve concurrente).
+      SESSIONS/2026-07-02-pos-offline-design.md
 - [x] Migrations backend déployées (stats + `phase4_hot_path_indexes` + `phase4_audit_journal`).
 - [x] Phase 4 : journal d'audit branché sur remboursements (3), modification de prix
       (produit + plat), changement de permissions (SM + resto), annulation de commande (SM + resto).
