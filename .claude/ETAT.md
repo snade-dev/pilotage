@@ -56,6 +56,9 @@
       page `/owner/audit-log` (filtre établissement, badges, avant/après lisible) — **mergée sur
       main front (f7f7076)**. Vérif visuelle non faite.
 - [x] Phase 5 Duplication (backend) — **mergée sur main (`159348c`, merge --no-ff)**.
+- [x] Phase 5 — contrôleur employes (backend) : dédup **écartée** (validation `@Body` NestJS
+      exige des classes DTO concrètes, or les DTO des 2 verticales diffèrent → fusion =
+      changement de validation). DTO mort `forgot-password.dto` (SM) supprimé (`52e9e1c`, poussé).
 - [x] Phase 5 Duplication (frontend) — **mergée sur main front (`8ae73ca`, --no-ff)** : couches
       data + hooks fournisseur factorisées via fabriques + scope (wrappers préservant noms/clés
       de cache), tsc/ESLint propres, Vitest 23/23. Triage : seul suppliers était un swap propre ;
@@ -73,8 +76,8 @@
 1. Passer les e2e Phase 4 (écrivent sur BD dev) pour valider bout-en-bout.
 2. Vérif visuelle de `/owner/audit-log` et `/owner/comparaison` (backend lancé + login partenaire).
 3. Poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
-4. (Optionnel Phase 5) dédup **contrôleur employes** (backend) ; reprise des paires front
-   reportées seulement si une vérif visuelle / e2e front est en place.
+4. (Phase 5) reprise des paires front reportées seulement si une vérif visuelle / e2e front
+   est en place. Contrôleur employes : écarté (voir ci-dessus), ne pas re-tenter.
 
 ## Décisions ouvertes / à trancher
 - Le webhook Stripe existe-t-il ? (à confirmer si pas déjà tranché en Phase 1)
@@ -96,4 +99,10 @@
   Reporté volontairement, ne pas re-tenter sans refonte.
 - Phase 5 : patron de dédup = base abstraite `common/<module>/` + objet `Scope` (discriminant) +
   sous-classes minces gardant leur nom de classe (token d'injection). Réutiliser ce patron.
+- Phase 5 : les CONTRÔLEURS NestJS ne se dédupent pas proprement quand les DTO diffèrent —
+  `@Body()` exige une classe DTO concrète pour la validation ; un générique/structurel casse la
+  validation. Garder les contrôleurs par verticale.
+- Front : même patron via fabriques (`makeXApi`/`makeXHooks`) + wrappers minces préservant les
+  noms exportés + clés de cache React Query. Pas de vérif visuelle → s'en tenir aux paires
+  réellement identiques (seul `fournisseur` l'était).
 - Règle permanente : aucune trace de Claude/IA dans le git.
