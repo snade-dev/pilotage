@@ -1,7 +1,7 @@
 # M1 (app client) — sous-chantier 1 : stockage d'images (backend)
 
 Date : 2026-07-02
-Repo : `all-in-one-backend` — branche `feat/m1-image-storage` (NON commitée, en relecture).
+Repo : `all-in-one-backend` — **PR #58 MERGÉE sur main (`6de2bfb`)**.
 
 ## Objectif
 Remplacer le stockage des images en **base64 en base** par un **vrai stockage de fichiers**,
@@ -53,8 +53,7 @@ Notes techniques :
 - Fichier mort repéré (hors périmètre) : `produit-magasin.service copy.txt`.
 
 ## En attente
-- **Relecture** (rien commité). Points à valider notamment : URL absolue via env, override
-  ts-jest esModuleInterop.
+- ✅ **Mergé** (PR #58 → `6de2bfb`).
 - Migration à exécuter **séparément et après validation** (tester d'abord via l'e2e-BD, puis
   `--dry-run` sur copie, puis `--confirm`).
 - Non-régression front : les data URLs déjà en base continuent de s'afficher pendant la

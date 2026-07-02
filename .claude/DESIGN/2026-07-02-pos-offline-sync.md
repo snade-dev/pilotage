@@ -455,3 +455,40 @@ Ce document vit dans le repo **pilotage** (`.claude/DESIGN/`) car la conception 
 **inter-repos** (front + back) et de niveau décision. À la validation, une entrée résumée
 sera ajoutée à `DECISIONS.md` (section « POS offline ») et l'implémentation suivra les
 jalons O1→O3 ci-dessus.
+
+---
+
+## 11. Référence visuelle (maquette Claude Design)
+
+**Direction visuelle retenue : « 1b — Frais épuré »** (vert oklch ~0.55 0.11 155, encre vert
+foncé #16211c, fond blanc froid #fbfcfb, police Hanken Grotesk, listes denses). Écartées : 1a
+(Marché chaleureux, ocre) et 1c (Bold fintech, sombre).
+
+Fichier maquette : `App Commande M1` (Claude Design). -https://claude.ai/design/p/036a8544-22b4-4646-a72e-969ff18bd6c7?file=App+Commande+M1.dc.html&via=share.
+
+### Écrans validés par la maquette (chemin nominal)
+- **2a Magasins** — liste des magasins proches, entrée sans compte, statut « ouvert / retrait aujourd'hui ».
+- **2b Catalogue** — liste dense, catégories, stock « Disponible / Épuisé » (jamais de chiffre), barre panier persistante.
+- **2c Fiche produit** — photo, prix, « Disponible en magasin », mention retrait comptoir + paiement à la remise.
+- **2d Panier** — récap, total à payer, mention « paiement au comptoir », teaser M2 (Wave/Orange Money).
+- **2e Compte** — identifiant téléphone (+221), « compte créé et relié à la fidélité, aucun email requis ».
+- **2f Vérification** — code SMS **ou WhatsApp**, renvoi minuté.
+- **2g Créneau** — choix jour + heure de retrait, rappel magasin.
+- **2h Suivi** — timeline reçue → en préparation → prête → retirée & payée, **code de retrait**.
+- **2i Historique** — commandes multi-magasins, fidélité reliée.
+- **2j Commerçant** — kanban de réception (Reçues → En préparation → Prêtes), note « le retrait décrémente le stock et alimente les stats (Phase 4) ».
+
+### Décisions actées par la maquette (à respecter à l'implémentation)
+- Stock affiché en **Disponible / Épuisé** uniquement (pas de quantité exacte).
+- **Compte client global**, non lié à un magasin : c'est la *commande* qui porte l'établissement
+  (l'historique montre des commandes chez plusieurs magasins).
+- **Décrément du stock au RETRAIT** (pas à la commande) → cohérent avec la logique d'écart.
+- Vérification téléphone par **SMS ou WhatsApp** (fournisseur externe à sourcer).
+
+### Écrans d'EXCEPTION à concevoir avant implémentation (absents de la maquette)
+- **Article devenu épuisé entre commande et préparation** → commande partielle / substitution /
+  annulation de ligne (pendant « commande » de la survente offline).
+- **Refus / annulation d'une commande** par le commerçant (le kanban n'a pas d'action « Refuser »).
+- **Panier vide**, **échec d'envoi du code SMS**, **créneau expiré sans retrait**.
+Ces cas déterminent la cohérence du stock hors chemin nominal — à traiter avec le même soin
+que les écarts offline.

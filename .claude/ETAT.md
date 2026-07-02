@@ -14,20 +14,19 @@
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
 | 4 Robustesse données | back | ✅ **PR #55 mergée** ; migrations déployées ; **e2e-BD Phase 4 verts** (isolation/atomicité/audit, branche `test/phase-4-e2e`) |
 | 5 Duplication | front + back | 🟡 **back MERGÉ (`159348c`)** : 4 fusionnés + 1 mort + categories reporté · **front MERGÉ (`8ae73ca`)** : fournisseur (data+hooks) fusionné, 6 autres paires reportées (divergence réelle) |
-| 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline back MERGÉ** (PR #57, `f50124c`) — reste PR front · **M1 images** back en revue (PR #58) |
+| 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline back MERGÉ** (PR #57, `f50124c`) — reste PR front · **M1 images back MERGÉ** (PR #58, `6de2bfb`) — reste migration à exécuter + vérif front |
 
 ## En cours / en attente
-- [~] **M1 (app client) — stockage d'images (backend)** : commité `f295c0d` sur branche
-      `feat/m1-image-storage`, poussée, **PR #58 ouverte** (base main). Interface abstraite
-      `ImageStorageService` + impl **dossier
+- [x] **M1 (app client) — stockage d'images (backend)** : **PR #58 MERGÉE sur main** (`6de2bfb`).
+      Interface abstraite `ImageStorageService` + impl **dossier
       local** (`common/image-storage/`, `@Global`) + miniatures `sharp` (thumb 200² / display
       800px webp) + service statique `/media` (`useStaticAssets`). Bascule des créations produit
       SM + plat resto via un **service commun** `persistImages` (patron Phase 5, zéro dup).
       Migration base64→fichiers **livrée mais NON exécutée** (fonction pure idempotente + commande
-      `scripts/migrate-images.ts` dry-run par défaut). Tests : **unit 241/241**, **e2e-BD 17/17**
-      (dry-run sans effet / conversion réelle / idempotence). Reste : relecture + merge PR #58,
-      exécution migration à part (après validation), vérif visuelle front (mix base64+URLs en
-      transition). SESSIONS/2026-07-02-m1-image-storage.md
+      `scripts/migrate-images.ts` dry-run par défaut). Tests : **unit 241/241**, **e2e-BD 17/17**.
+      **Reste** : exécuter la migration à part (après validation : e2e-BD → `--dry-run` sur copie →
+      `--confirm`), vérif visuelle front (mix base64+URLs en transition).
+      SESSIONS/2026-07-02-m1-image-storage.md
 - [~] **Phase 6 — Mode offline robuste du POS** : CODE + E2E COMPLETS (O0→O2c), en attente de
       merge (PR #57 back + PR front à ouvrir). O3 multi-caisses optionnel. Détail des jalons :
       O0 conception + O1 fait (front).
@@ -127,9 +126,8 @@
       SESSIONS/2026-07-01-phase-5-dedup-backend.md
 
 ## Prochaine action
-1. **M1 images** : relire + merger **PR #58** (back `feat/m1-image-storage`, unit 241/241 +
-   e2e-BD 17/17). Puis exécuter la migration base64→fichiers **à part** (e2e-BD → `--dry-run`
-   sur copie → `--confirm`) + vérif visuelle front (mix base64+URLs).
+1. **M1 images** : PR #58 mergée (`6de2bfb`). Reste : exécuter la migration base64→fichiers
+   **à part** (e2e-BD → `--dry-run` sur copie → `--confirm`) + vérif visuelle front (mix base64+URLs).
 2. **POS offline** : #57 mergée. Ouvrir + merger la **PR front** (`feature/pos-offline-o1`,
    compare main...feature/pos-offline-o1) — à la main (gh non collaborateur du repo front).
 3. Relire + merger `test/phase-4-e2e` (e2e-BD Phase 4). Relancer via `pnpm test:e2e:db` (Docker requis).
