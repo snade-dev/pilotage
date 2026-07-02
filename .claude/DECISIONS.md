@@ -25,6 +25,25 @@ basculable en pré-agrégé plus tard, sans changer le contrat d'API.
 paie cette complexité que si la lenteur est mesurée. CA toujours NET des remboursements.
 **Alternatives écartées :** pré-agrégat dès la V1 (complexité + bugs d'invalidation prématurés).
 
+## 2026-07-02 — POS offline : file d'opérations idempotentes + stock négatif toléré
+**Choix :** synchronisation offline du POS par **file d'opérations idempotentes** (UUID
+généré côté caisse = `opId`, mappé sur `Commande.clientRequestId @unique` pour la vente),
+rejeu à la reconnexion sans double effet. **Conflit de stock : on accepte toutes les ventes**
++ alerte d'écart ; stock négatif **toléré à la réconciliation**, journalisé via
+`AuditJournalService.record` (`ECART_STOCK_OFFLINE`). **En ligne = strict** (rejet sous zéro).
+**Décisions cadre (2026-07-02) :** supermarché seul en O0 ; **remboursement offline
+INTERDIT** (⇒ vente = seul type offline, aucune table nouvelle) ; **seam stock réécrit en
+écritures atomiques** (`increment` en mode toléré, `updateMany` conditionnel en strict —
+corrige un lost-update latent aussi en ligne) ; session ouverte EN LIGNE avant bascule ; pas
+d'expiration temporelle des ops ; numérotation reçus sans objet (`Commande.id` = UUID).
+**Pourquoi :** plusieurs caisses vendent en simultané hors-ligne sur un stock partagé ;
+refuser une vente au rejeu = perdre de l'argent déjà encaissé. On préfère accepter + tracer
+l'écart et régulariser par inventaire.
+**Alternatives écartées :** rejet des ventes qui passent sous zéro (perte de CA réel) ;
+verrou applicatif / `SELECT FOR UPDATE` (inutile : la base sérialise des deltas atomiques).
+**Jalons :** O1 file locale + rejeu unitaire ordonné (fait) → O2 tolérance négative + écarts
+→ O3 multi-caisses durci. Design : `.claude/DESIGN/2026-07-02-pos-offline-sync.md`.
+
 ## 2026-07-01 — Suivi inter-sessions via `.claude/`
 **Choix :** la source de vérité du projet vit dans git, pas dans une session Claude.
 **Pourquoi :** les sessions n'ont pas de mémoire fiable ; le git persiste.

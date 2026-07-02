@@ -1,4 +1,4 @@
-# État du projet all-in-one — dernière mise à jour : 2026-07-01
+# État du projet all-in-one — dernière mise à jour : 2026-07-02
 
 > Suivi centralisé des DEUX repos. Lire ce fichier en premier à chaque session.
 > Repos : Frontend (Next.js, All-in-One-Partner-Hub) · Backend (NestJS).
@@ -17,6 +17,43 @@
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
 ## En cours / en attente
+- [~] **Phase 6 — Mode offline robuste du POS** : O0 conception + O1 fait (front).
+      Design : `.claude/DESIGN/2026-07-02-pos-offline-sync.md`. Décision cadre actée dans
+      DECISIONS.md (2026-07-02). Cadre : file d'opérations idempotentes (opId=UUID caisse →
+      `clientRequestId`), stock négatif toléré au rejeu + alerte `ECART_STOCK_OFFLINE`, en
+      ligne reste STRICT ; remboursement offline INTERDIT ; supermarché seul en O0 ; aucune
+      table nouvelle.
+      **O1 FAIT (front, commité `feature/pos-offline-o1` — 322c73b)** : ordre de rejeu =
+      chronologique réel (champ `seq` monotone + tri par `createdAt`/`seq`) au lieu de l'ordre
+      de clé UUID quelconque ; helpers purs `compareSalesForReplay`/`sortSalesForReplay` +
+      5 tests Vitest (28/28 suite), tsc propre. Zéro changement backend.
+      **O2a FAIT (backend, commité `feature/pos-offline-o2-stock-seam` — adab2ab)** :
+      `negativeStockPolicy` (STRICT défaut / TOLERATE_NEGATIVE) + `ecartNegatif` sur
+      `StockMovementService.apply` ; STRICT inchangé, 219 unit verts (dont 3 TOLERATE), tsc
+      propre.
+      **Découverte** : le POS SM n'applique PAS la vente via le seam mais par un pré-check
+      (pos-session.service.ts:1730) + `decrement` atomique inline (~2141/2193). ⇒ O2b devra
+      neutraliser ce pré-check dans le contexte de rejeu (endpoint `sync-operations`), pas
+      seulement le seam. Bon point : décrément SM déjà atomique (pas de lost-update sur cette
+      voie).
+      **O2b FAIT (back `feature/pos-offline-o2-stock-seam` 01b937b + front `feature/pos-offline-o1`
+      b5d8001)** : `effectuerVente({offlineReplay})` (pré-check relâché + `validateVente
+      skipStockCheck`) applique la survente + journalise `ECART_STOCK_OFFLINE`, renvoie
+      `stockNegatif` ; endpoint `POST /supermarche/pos-session/sync-operations` (rejeu par lot,
+      résultat par op APPLIED/REJECTED/RETRY) ; `/vente` en ligne reste strict. Front : la file
+      de sync passe par `sync-operations`. back 226/226 + front 28/28, tsc propre.
+      **O2c FAIT (front `feature/pos-offline-o1` ced777f)** : alerte de survente à la sync
+      (toast si `stockNegatif`, à régulariser par ajustement) + refus `REJECTED` rendu terminal
+      dans la file (`markSaleRejected`, retries=MAX, plus de retry auto) ; transitoires toujours
+      retentés. 30/30 front, tsc propre.
+      **e2e-BD** : squelettes ajoutés (back f43337f) — `pos-offline-stock` (seam TOLERATE/STRICT
+      vrai PG) + `pos-offline-idempotence` (clientRequestId P2002) + flux complet skippé ;
+      typecheck OK, NON exécutés (Docker Desktop absent). **PR** : backend
+      `Nagtic-co/all-in-one-backend#57` ouverte ; front branche `feature/pos-offline-o1` poussée
+      mais PR à ouvrir à la main (gh non collaborateur du repo front) :
+      compare main...feature/pos-offline-o1.
+      **Reste** : lancer `pnpm test:e2e:db` sous Docker + finaliser 3 scénarios skippés ; ouvrir
+      PR front ; O3 multi-caisses durci. SESSIONS/2026-07-02-pos-offline-design.md
 - [x] Migrations backend déployées (stats + `phase4_hot_path_indexes` + `phase4_audit_journal`).
 - [x] Phase 4 : journal d'audit branché sur remboursements (3), modification de prix
       (produit + plat), changement de permissions (SM + resto), annulation de commande (SM + resto).
