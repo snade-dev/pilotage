@@ -12,7 +12,7 @@
 | Module Statistiques (backend) | back | ✅ mergé |
 | Module Statistiques (frontend) | front | ✅ mergé sur main |
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
-| 4 Robustesse données | back | ✅ **PR #55 mergée sur main** ; migrations déployées ; reste e2e à passer |
+| 4 Robustesse données | back | ✅ **PR #55 mergée** ; migrations déployées ; **e2e-BD Phase 4 verts** (isolation/atomicité/audit, branche `test/phase-4-e2e`) |
 | 5 Duplication | front + back | 🟡 **back MERGÉ (`159348c`)** : 4 fusionnés + 1 mort + categories reporté · **front MERGÉ (`8ae73ca`)** : fournisseur (data+hooks) fusionné, 6 autres paires reportées (divergence réelle) |
 | 6 Fonctionnalités | front + back | 🟡 stats = 1re (en cours) |
 
@@ -21,7 +21,9 @@
 - [x] Phase 4 : journal d'audit branché sur remboursements (3), modification de prix
       (produit + plat), changement de permissions (SM + resto), annulation de commande (SM + resto).
 - [x] Phase 4 : PR #55 mergée sur main.
-- [ ] Phase 4 : e2e à passer (écrivent sur BD dev).
+- [~] Phase 4 : e2e-BD écrits + verts sur base **jetable Docker** (jamais `aio`). 3 garanties
+      prouvées (isolation/atomicité/audit), commande unique `pnpm test:e2e:db`. Branche
+      `test/phase-4-e2e` à relire/merger. SESSIONS/2026-07-02-phase-4-e2e.md
 
 ## Fait (validé + mergé)
 ### Backend
@@ -73,7 +75,7 @@
       SESSIONS/2026-07-01-phase-5-dedup-backend.md
 
 ## Prochaine action
-1. Passer les e2e Phase 4 (écrivent sur BD dev) pour valider bout-en-bout.
+1. Relire + merger `test/phase-4-e2e` (e2e-BD Phase 4). Relancer via `pnpm test:e2e:db` (Docker requis).
 2. Vérif visuelle de `/owner/audit-log` et `/owner/comparaison` (backend lancé + login partenaire).
 3. Poursuivre la traîne `any` Phase 3 (`hooks/` puis `app/`).
 4. (Phase 5) reprise des paires front reportées seulement si une vérif visuelle / e2e front
@@ -105,4 +107,8 @@
 - Front : même patron via fabriques (`makeXApi`/`makeXHooks`) + wrappers minces préservant les
   noms exportés + clés de cache React Query. Pas de vérif visuelle → s'en tenir aux paires
   réellement identiques (seul `fournisseur` l'était).
+- e2e-BD : `pnpm test:e2e:db` (Docker) monte un postgres jetable (port 5434, base `aio_e2e`),
+  applique les migrations, tourne les specs `test/e2e-db/*.db-e2e-spec.ts`, détruit le conteneur.
+  Garde-fou `setup-env.ts` : refuse de tourner sans `TEST_DATABASE_URL` et refuse `aio`. Ne JAMAIS
+  faire écrire les e2e sur la BD dev.
 - Règle permanente : aucune trace de Claude/IA dans le git.
