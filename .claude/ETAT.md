@@ -1,4 +1,4 @@
-# État du projet all-in-one — dernière mise à jour : 2026-07-02
+# État du projet all-in-one — dernière mise à jour : 2026-07-03
 
 > Suivi centralisé des DEUX repos. Lire ce fichier en premier à chaque session.
 > Repos : Frontend (Next.js, All-in-One-Partner-Hub) · Backend (NestJS).
@@ -14,7 +14,7 @@
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
 | 4 Robustesse données | back | ✅ **PR #55 mergée** ; migrations déployées ; **e2e-BD Phase 4 verts** (isolation/atomicité/audit, branche `test/phase-4-e2e`) |
 | 5 Duplication | front + back | 🟡 **back MERGÉ (`159348c`)** : 4 fusionnés + 1 mort + categories reporté · **front MERGÉ (`8ae73ca`)** : fournisseur (data+hooks) fusionné, 6 autres paires reportées (divergence réelle) |
-| 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline back MERGÉ** (PR #57, `f50124c`) — reste PR front · **M1 images back MERGÉ** (PR #58, `6de2bfb`) — reste migration à exécuter + vérif front |
+| 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline back MERGÉ** (PR #57, `f50124c`) — reste PR front · **M1 images back MERGÉ** (PR #58, `6de2bfb`) — reste migration à exécuter + vérif front · **M1-b API publique catalogue back MERGÉ+POUSSÉ** (`fbb70c3`) — reste toggle front |
 
 ## En cours / en attente
 - [x] **M1 (app client) — stockage d'images (backend)** : **PR #58 MERGÉE sur main** (`6de2bfb`).
@@ -33,6 +33,34 @@
       `PUBLIC_MEDIA_BASE_URL` absolue pour l'app desktop/front). Ne pas oublier de sauvegarder
       `uploads/` (backend) au même titre que la base — les images sont désormais des fichiers.
       SESSIONS/2026-07-02-m1-image-storage.md
+- [x] **M1-b (app client) — API publique catalogue (backend)** : **MERGÉE + POUSSÉE sur main**
+      (`fbb70c3`, commit `2cb82f0`). Surface `@Public()` séparée, préfixe `/public/v1`, throttling
+      renforcé (60 req/60 s/IP ; `ThrottlerGuard` n'est pas global). 4 endpoints : liste
+      établissements visibles (SM+resto), fiche+catégories, catalogue paginé/filtré, détail item.
+      Type inconnu / établissement non visible → **404** (jamais 403). Stock exposé « DISPONIBLE /
+      EPUISE » seulement, jamais chiffré. **Double barrière anti-fuite** : `select` Prisma restreint
+      + mapper de sortie strict (jamais l'entité brute) ; aucun champ de gestion. Prix public =
+      `prixOnline`. Vignettes via convention M1-a (`deriveThumbnailUrl`). **Visibilité opt-in** :
+      champ `estVisiblePublic @default(false)` sur Supermarche+Restaurant (migration
+      `20260702120000_add_etablissement_visibilite_publique` **appliquée sur `aio`**, poussée ;
+      prod = auto au `start`). Écriture du champ via `PATCH /etablissement/:id` (DTO + whitelist
+      étendus). Tests : **17 unit + 7 e2e-BD** ; suites **258 unit / 24 e2e-BD** vertes ; API de
+      gestion intacte. **Reste** : toggle « visible publiquement » côté front (Owner Hub /
+      paramètres établissement) — EN COURS. Design doc M1 « fait foi » introuvable dans les dépôts
+      (conception reconstituée depuis décisions actées). SESSIONS/2026-07-02-m1-public-catalog.md
+- [~] **M1-b — recherche cross-catalogue publique (backend)** : livrée sur `feat/m1-public-catalog-api`
+      (ff sur `main`), **NON commité, en attente de relecture**. Nouvel endpoint
+      `GET /public/v1/recherche` (`@Public()`, throttle **renforcé 20 req/60 s/IP**) : cherche un
+      produit/plat par nom À TRAVERS tous les établissements visibles (SM+resto) et **regroupe les
+      offres par item logique** (clé = EAN si présent, sinon nom normalisé + type ; pas de fusion
+      SM/resto). Réponse = { nom, type, prixMin, prixMax, nbOffres, offres:[{établissement, itemId,
+      prix, DISPONIBLE/EPUISE, imageThumbnailUrl, distanceKm}] } ; distance (haversine) si lat/lng.
+      **Perf** : migration `20260703120000_add_public_search_trgm` (extension `pg_trgm` + index GIN
+      trigram sur `produit_magasin.nom` et `plat.nom`) → `ILIKE '%q%'` indexé, pas de scan
+      séquentiel. Mêmes garde-fous anti-fuite (select restreint + mapper strict ; `estVisiblePublic`
+      par offre). `.env.example` documente `PUBLIC_MEDIA_BASE_URL`. Tests : **13 unit + 6 e2e-BD** ;
+      suites **271 unit / 25 · 30 e2e-BD / 9** vertes ; gestion intacte (additif pur).
+      SESSIONS/2026-07-03-m1-public-search.md
 - [~] **Phase 6 — Mode offline robuste du POS** : CODE + E2E COMPLETS (O0→O2c), en attente de
       merge (PR #57 back + PR front à ouvrir). O3 multi-caisses optionnel. Détail des jalons :
       O0 conception + O1 fait (front).
@@ -132,6 +160,22 @@
       SESSIONS/2026-07-01-phase-5-dedup-backend.md
 
 ## Prochaine action
+0. **M1-b API publique** : back mergé+poussé sur `main`, migration appliquée. **Recherche
+   cross-catalogue livrée sur `feat/m1-public-catalog-api` (NON commité, à relire)** : endpoint
+   `GET /public/v1/recherche` + regroupement offres (EAN/nom) + migration trigram `pg_trgm` +
+   `.env.example` (PUBLIC_MEDIA_BASE_URL) ; 13 unit + 6 e2e-BD verts. Après relecture : commit +
+   merge + push, puis déployer la migration trigram. **Toggle « visible publiquement » COMMITÉ sur
+   branches (non mergé, non poussé)** :
+   - BACK `feat/etablissement-public-visibility` (`c85a641`) : `PATCH /etablissements/:id` accepte
+     `estVisiblePublic` (DTO+whitelist) + nouveau `GET /etablissements/:id` (owner-scopé, renvoie
+     `estVisiblePublic` ; corrige la page settings qui appelait un endpoint inexistant).
+   - FRONT `feat/public-visibility-toggle` (`5c5b795`, branché sur `main`) : interrupteur sur la
+     page paramètres établissement (Owner Hub). Le working tree front est **resté** sur
+     `feature/pos-offline-o1` (POS offline), propre.
+   - **Reste** : rejouer l'e2e-BD du toggle (écrit, NON exécuté — Docker était HS ; **Docker de
+     nouveau opérationnel le 2026-07-03**, e2e-BD relancés verts pour la recherche), puis merger +
+     pousser les 2 branches. typecheck back+front VERT ; e2e publique (7) déjà verte.
+   - Ensuite M1-c/M1-d (comptes clients + commandes) sur la base de cette API.
 1. **M1 images** : PR #58 + #59 mergées ; **migration base64→fichiers EXÉCUTÉE sur `aio`**
    (9 images, backup fait). Reste : vérif visuelle front (URLs `/media` relatives ; trancher
    `PUBLIC_MEDIA_BASE_URL` absolue si le front/desktop charge les images hors proxy).
@@ -175,6 +219,14 @@
   Garde-fou `setup-env.ts` : refuse de tourner sans `TEST_DATABASE_URL` et refuse `aio`. Ne JAMAIS
   faire écrire les e2e sur la BD dev.
 - Règle permanente : aucune trace de Claude/IA dans le git.
+- **Incident 2026-07-03 — disque `C:` plein (0 o)** : a fait planter `tsc` en OOM par intermittence
+  ET fait passer le **FS interne de Docker en lecture seule** → `docker run/rm` échouent
+  (`read-only file system` sur overlay2), un conteneur jetable **`aio-e2e-pg` est resté bloqué**
+  sur le port 5434 (non supprimable). Libérer le disque hôte ne suffit PAS : il faut **redémarrer
+  Docker Desktop** pour que le FS de sa VM redevienne inscriptible, puis `docker rm -f aio-e2e-pg`
+  (nom exact). Après ça, `pnpm test:e2e:db` remarche. `aio-db` (5432) est resté intact.
+  Astuce : lancer `tsc` avec `NODE_OPTIONS=--max-old-space-size=2048 --max-semi-space-size=64`
+  si la RAM libre est basse.
 - **Base dev `aio`** : tourne dans Docker → conteneur **`aio-db`** (`postgres:17-bookworm`, glibc 2.36
   pour matcher le volume, sinon avertissement/blocage de collation), port **5432**, volume
   `70225bc2a0ae…`. Restaurée le 2026-07-02 après qu'un `docker rm` à filtre large a retiré l'ancien
