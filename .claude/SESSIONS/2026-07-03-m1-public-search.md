@@ -78,10 +78,18 @@ Additif pur : 7 nouveaux fichiers + 3 fichiers touchés en ajout seul (types de 
 enregistrement module, 1 bloc `.env.example`). Aucun contrôleur/service/DTO de gestion
 modifié. Migration = extension + 2 index (aucun changement de modèle Prisma).
 
-## Reste à faire
-1. Relecture puis commit/merge/push de `feat/m1-public-catalog-api`.
-2. Déployer la migration `20260703120000_add_public_search_trgm` (extension pg_trgm).
-3. **Finir le toggle de visibilité** (rend le catalogue public exploitable) : Docker de
-   nouveau opérationnel → rejouer l'e2e-BD du toggle sur `feat/etablissement-public-visibility`,
-   puis merger + pousser back + front (`feat/public-visibility-toggle`).
-4. Enchaîner M1-c / M1-d (comptes clients, commandes).
+## Suite (même jour) — relecture OK → tout mergé/poussé
+- **Recherche** : commit `a4b17e2` → merge `main` `0941877` → **poussé** `origin/main`
+  (`fbb70c3..0941877`). Migration `add_public_search_trgm` **déployée sur `aio`**
+  (`prisma migrate deploy`) ; `pg_trgm` + `produit_magasin_nom_trgm_idx` +
+  `plat_nom_trgm_idx` vérifiés en base.
+- **Toggle visibilité** : Docker de nouveau opérationnel → `main` mergé dans
+  `feat/etablissement-public-visibility`, e2e-BD **rejoués 33/33 verts** (dont les 3 tests
+  toggle « masqué par défaut / activer → visible / désactiver → masqué »). Puis :
+  - BACK `feat/etablissement-public-visibility` → merge `main` `86092e3` **poussé**
+    (`0941877..86092e3`).
+  - FRONT `feat/public-visibility-toggle` → merge `main` `57562c5` **poussé**
+    (`8ae73ca..57562c5`), typecheck front VERT. Working tree front **restauré** sur
+    `feature/pos-offline-o1`.
+- **M1-b est complète** (catalogue + recherche + toggle). Reste : M1-c / M1-d (comptes
+  clients, commandes) sur la base de cette API.

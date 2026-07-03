@@ -14,7 +14,7 @@
 | 3 Qualité de type | front | 🟡 Lot 0+1 mergés sur main (build protégé, lib/ 0 any) ; traîne app/+hooks/ restante |
 | 4 Robustesse données | back | ✅ **PR #55 mergée** ; migrations déployées ; **e2e-BD Phase 4 verts** (isolation/atomicité/audit, branche `test/phase-4-e2e`) |
 | 5 Duplication | front + back | 🟡 **back MERGÉ (`159348c`)** : 4 fusionnés + 1 mort + categories reporté · **front MERGÉ (`8ae73ca`)** : fournisseur (data+hooks) fusionné, 6 autres paires reportées (divergence réelle) |
-| 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline back MERGÉ** (PR #57, `f50124c`) — reste PR front · **M1 images back MERGÉ** (PR #58, `6de2bfb`) — reste migration à exécuter + vérif front · **M1-b API publique catalogue back MERGÉ+POUSSÉ** (`fbb70c3`) — reste toggle front |
+| 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline back MERGÉ** (PR #57, `f50124c`) — reste PR front · **M1 images back MERGÉ** (PR #58, `6de2bfb`) — reste migration à exécuter + vérif front · **M1-b API publique COMPLÈTE** (catalogue + recherche cross-catalogue + toggle visibilité front/back, mergé+poussé `86092e3`/`57562c5`, migration trigram déployée) |
 
 ## En cours / en attente
 - [x] **M1 (app client) — stockage d'images (backend)** : **PR #58 MERGÉE sur main** (`6de2bfb`).
@@ -45,11 +45,12 @@
       `20260702120000_add_etablissement_visibilite_publique` **appliquée sur `aio`**, poussée ;
       prod = auto au `start`). Écriture du champ via `PATCH /etablissement/:id` (DTO + whitelist
       étendus). Tests : **17 unit + 7 e2e-BD** ; suites **258 unit / 24 e2e-BD** vertes ; API de
-      gestion intacte. **Reste** : toggle « visible publiquement » côté front (Owner Hub /
-      paramètres établissement) — EN COURS. Design doc M1 « fait foi » introuvable dans les dépôts
-      (conception reconstituée depuis décisions actées). SESSIONS/2026-07-02-m1-public-catalog.md
-- [~] **M1-b — recherche cross-catalogue publique (backend)** : livrée sur `feat/m1-public-catalog-api`
-      (ff sur `main`), **NON commité, en attente de relecture**. Nouvel endpoint
+      gestion intacte. Toggle « visible publiquement » (Owner Hub) : **mergé+poussé le 2026-07-03**
+      (voir bullet recherche + Prochaine action #0). Design doc M1 « fait foi » introuvable dans les
+      dépôts (conception reconstituée depuis décisions actées). SESSIONS/2026-07-02-m1-public-catalog.md
+- [x] **M1-b — recherche cross-catalogue publique (backend)** : **MERGÉE + POUSSÉE sur `main`**
+      (`0941877`, commit `a4b17e2`) ; **migration trigram `20260703120000_add_public_search_trgm`
+      DÉPLOYÉE sur `aio`** (extension `pg_trgm` + 2 index GIN vérifiés). Nouvel endpoint
       `GET /public/v1/recherche` (`@Public()`, throttle **renforcé 20 req/60 s/IP**) : cherche un
       produit/plat par nom À TRAVERS tous les établissements visibles (SM+resto) et **regroupe les
       offres par item logique** (clé = EAN si présent, sinon nom normalisé + type ; pas de fusion
@@ -160,22 +161,15 @@
       SESSIONS/2026-07-01-phase-5-dedup-backend.md
 
 ## Prochaine action
-0. **M1-b API publique** : back mergé+poussé sur `main`, migration appliquée. **Recherche
-   cross-catalogue livrée sur `feat/m1-public-catalog-api` (NON commité, à relire)** : endpoint
-   `GET /public/v1/recherche` + regroupement offres (EAN/nom) + migration trigram `pg_trgm` +
-   `.env.example` (PUBLIC_MEDIA_BASE_URL) ; 13 unit + 6 e2e-BD verts. Après relecture : commit +
-   merge + push, puis déployer la migration trigram. **Toggle « visible publiquement » COMMITÉ sur
-   branches (non mergé, non poussé)** :
-   - BACK `feat/etablissement-public-visibility` (`c85a641`) : `PATCH /etablissements/:id` accepte
-     `estVisiblePublic` (DTO+whitelist) + nouveau `GET /etablissements/:id` (owner-scopé, renvoie
-     `estVisiblePublic` ; corrige la page settings qui appelait un endpoint inexistant).
-   - FRONT `feat/public-visibility-toggle` (`5c5b795`, branché sur `main`) : interrupteur sur la
-     page paramètres établissement (Owner Hub). Le working tree front est **resté** sur
-     `feature/pos-offline-o1` (POS offline), propre.
-   - **Reste** : rejouer l'e2e-BD du toggle (écrit, NON exécuté — Docker était HS ; **Docker de
-     nouveau opérationnel le 2026-07-03**, e2e-BD relancés verts pour la recherche), puis merger +
-     pousser les 2 branches. typecheck back+front VERT ; e2e publique (7) déjà verte.
-   - Ensuite M1-c/M1-d (comptes clients + commandes) sur la base de cette API.
+0. **M1-b API publique — TERMINÉE (recherche + toggle), tout mergé/poussé le 2026-07-03** :
+   - **Recherche cross-catalogue** : back `main` (`0941877`) + **migration trigram déployée sur `aio`**.
+   - **Toggle « visible publiquement »** : e2e-BD du toggle **rejoué VERT** (Docker de nouveau OK) →
+     BACK `feat/etablissement-public-visibility` (`c85a641`) **MERGÉ+POUSSÉ** (`86092e3`) : `PATCH
+     /etablissements/:id` (`estVisiblePublic` DTO+whitelist) + `GET /etablissements/:id` owner-scopé ;
+     FRONT `feat/public-visibility-toggle` (`5c5b795`) **MERGÉ+POUSSÉ** (`57562c5`) : interrupteur
+     page paramètres établissement (Owner Hub). Working tree front **restauré** sur
+     `feature/pos-offline-o1`. Suites finales : **271 unit / 33 e2e-BD** vertes ; typecheck back+front VERT.
+   - **Ensuite** : M1-c/M1-d (comptes clients + commandes) sur la base de cette API.
 1. **M1 images** : PR #58 + #59 mergées ; **migration base64→fichiers EXÉCUTÉE sur `aio`**
    (9 images, backup fait). Reste : vérif visuelle front (URLs `/media` relatives ; trancher
    `PUBLIC_MEDIA_BASE_URL` absolue si le front/desktop charge les images hors proxy).
