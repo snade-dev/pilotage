@@ -492,3 +492,30 @@ Fichier maquette : `App Commande M1` (Claude Design). -https://claude.ai/design/
 - **Panier vide**, **échec d'envoi du code SMS**, **créneau expiré sans retrait**.
 Ces cas déterminent la cohérence du stock hors chemin nominal — à traiter avec le même soin
 que les écarts offline.
+
+---
+
+## 12. Mise à jour du périmètre M1 (2026-07-02)
+
+### Périmètre M1 confirmé
+- **Supermarchés ET restaurants dès M1.** Le catalogue, la recherche, le panier et la commande
+  gèrent les DEUX modèles : produits (SM, avec variantes) et plats (resto, avec groupes d'options
+  et menus). Réutiliser le patron Scope (Phase 5) pour factoriser SM/resto sans duplication.
+- **Retrait au comptoir uniquement.** Paiement au comptoir. Pas de paiement en ligne (M2).
+- **Livraison = M3** (voir ci-dessous). Montrée en « bientôt » dans l'app, non fonctionnelle en M1.
+
+### NOUVEAU — Recherche cross-catalogue (ajout à M1-b)
+Un mode de découverte orienté PRODUIT (et non magasin) : le client cherche un nom
+(ex. « riz parfumé ») et voit les offres de TOUS les établissements visibles publiquement.
+- Un même produit/plat peut ex  ister dans plusieurs établissements, à des prix différents →
+  la recherche liste les offres par établissement (nom, prix, dispo, distance).
+- Ne remonte QUE les établissements visibles publiquement ; jamais de données de gestion.
+- **Performance** : prévoir un index de recherche texte (pas un simple `LIKE` non indexé) car la
+  recherche porte sur le catalogue de tous les établissements → sujet de scalabilité dès la conception.
+- Couvre SM (produits) ET resto (plats).
+- Reste en lecture publique, sans compte.
+
+### Écrans à ajouter à la maquette (direction 1b)
+- Écran de recherche globale (barre + résultats multi-établissements, groupés par produit/plat).
+- Sélecteur « retrait / livraison » avec **livraison grisée « bientôt »** (prépare M3 visuellement).
+- Adaptation catalogue/fiche pour les plats resto (options, menus) en plus des produits SM.

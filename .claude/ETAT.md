@@ -15,23 +15,23 @@
 | 6 · App cliente M1-a/b (images, API publique, catalogue) | back | ✅ |
 | 6 · App cliente — front Expo (Étape 1+2 consultation) | app | ✅ commité sur main |
 | 6 · M1-c (comptes tél.) + M1-d (commande retrait) — BACKEND | back | ✅ mergés main, migration appliquée en local |
-| 6 · App cliente Étape 3 (compte, panier, commande, suivi) | app | 🟡 CODÉ (branche `feat/etape3-transactionnel`), typecheck vert, **non commité — attente tests Expo Go + relecture** |
-| 6 · Feed public `/public/v1/feed` (accueil produits) | back | 🟡 codé + testé en réel, non commité |
-| 6 · Kanban « Commandes en ligne » (maquette 2j) | front-gestion | 🟡 codé, typecheck vert, non commité |
+| 6 · App cliente Étape 3 (compte, panier, commande, suivi) | app | ✅ testé Expo Go, **mergé main** (479222f) |
+| 6 · Feed public `/public/v1/feed` (accueil produits) | back | ✅ mergé main (a5bbf63) |
+| 6 · Kanban « Commandes en ligne » (maquette 2j) | front-gestion | ✅ mergé main (06e2a8c) |
 
 ## En cours / en attente
-- [ ] **Tests manuels Étape 3** sur Expo Go + Partner Hub (parcours complet : compte →
-      panier → créneau → suivi ↔ kanban commerçant ; commande de test #00DkLEY en file).
-- [ ] **Commits après relecture** : 3 repos (app branche étape 3 ; back feed ; hub kanban).
-- [?] **Push / remote** de l'app Expo — à confirmer (travail non poussé = risque disque).
+- [ ] **Push des 4 repos** vers leurs remotes (merges locaux seulement — risque disque).
+- [ ] Hub : diff local NON commité sur `src/lib/api.ts` (assainissement messages d'erreur
+      HTML dans les toasts, session antérieure) — à relire puis commiter ou jeter.
+- [ ] Migration `add_compte_client_telephone` : appliquée en LOCAL, à déployer en prod
+      avec le prochain déploiement backend.
 - [ ] Traîne `any` Phase 3 (front) — tâche de fond.
 
 ## Prochaine action
-1. Tester l'Étape 3 bout-en-bout (détail : SESSIONS/2026-07-04-client-etape3-transactionnel.md).
-2. Relecture + commits (app, back, hub) — messages sans trace IA.
-3. Sourcer le fournisseur SMS/WhatsApp (impl prod `VerificationCodeSender`) + démarches
+1. Pousser les 4 repos.
+2. Sourcer le fournisseur SMS/WhatsApp (impl prod `VerificationCodeSender`) + démarches
    Wave/Orange (bloque M2).
-4. Backend (améliorations relevées) : exposer le `code` d'erreur (filtre global l'avale),
+3. Backend (améliorations relevées) : exposer le `code` d'erreur (filtre global l'avale),
    valider `creneauRetrait` futur, porter le nom d'établissement sur la commande client.
 
 ## Décisions ouvertes
