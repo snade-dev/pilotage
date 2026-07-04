@@ -14,8 +14,9 @@
 | 6 · POS offline | back+front | ✅ mergé |
 | 6 · App cliente M1-a/b (images, API publique, catalogue) | back | ✅ |
 | 6 · App cliente — front Expo (Étape 1+2) | app | 🟡 catalogue affiché, bug détail à confirmer |
-| 6 · App cliente M1-d (commande retrait) — BACKEND | back | 🟡 codé + tests verts, non commité (relecture) |
-| 6 · App cliente M1-c (comptes tél. vérifiés) / M1-d front | back+app | ⬜ à venir |
+| 6 · App cliente M1-d (commande retrait) — BACKEND | back | ✅ commité (branche `feat/m1d-commandes-retrait`) |
+| 6 · App cliente M1-c (comptes tél. vérifiés) — BACKEND | back | 🟡 codé, unit verts (291/291), e2e-BD à rejouer (Docker HS), non commité (relecture) |
+| 6 · App cliente M1-d front (écrans commande/suivi) | app | ⬜ à venir (après M1-c) |
 
 ## En cours / en attente
 - [?] **Bug écran détail app** (« produit introuvable » au clic sur établissement) —
@@ -25,13 +26,18 @@
 - [ ] Traîne `any` Phase 3 (front) — tâche de fond.
 
 ## Prochaine action
-1. **Relire M1-d backend** (branche `feat/m1d-commandes-retrait`, non commitée) puis commit +
-   déployer la migration `add_commande_retrait`. Restaurer le stash `wip-media-absolute-urls`
-   sur `fix/public-media-absolute-urls` (mis de côté pour garder la branche M1-d propre).
+1. **Relire M1-c backend** (branche `feat/m1c-comptes-clients`, partant de M1-d, non commitée) :
+   auth téléphone vérifiée (démarrer/vérifier code, session client), `VerificationCodeSender`
+   (dev = log, garde-fou prod), rattachement fidélité par téléphone, `@CurrentClientId` déjà
+   branché. Design : `.claude/DESIGN/2026-07-04-m1c-comptes-clients.md`.
+   **Rejouer `pnpm test:e2e:db` après redémarrage de Docker Desktop** (le backend Docker est
+   passé en lecture seule en cours de session → conteneur de test `aio-e2e-pg` bloqué ; 1er run
+   48/49, l'unique échec = bug de test depuis corrigé). Puis commit + déployer la migration
+   `add_compte_client_telephone`.
 2. Confirmer que le catalogue s'affiche correctement sur Expo Go (clic établissement → produits).
-3. Backend M1-c : comptes clients (auth téléphone vérifiée) — se branche sur `@CurrentClientId`.
-   Puis écrans commande/suivi de l'app (APRÈS ces endpoints).
-4. Sourcer le fournisseur SMS/WhatsApp (bloque M1-c) + démarches Wave/Orange (bloque M2).
+3. Écrans commande/suivi + compte de l'app cliente (APRÈS relecture/merge M1-c).
+4. Sourcer le fournisseur SMS/WhatsApp (impl réelle du `VerificationCodeSender`) + démarches
+   Wave/Orange (bloque M2).
 
 ## Décisions ouvertes
 - Majoration « application mobile » : le prix public inclut-il la majoration, ou le prix brut ?
