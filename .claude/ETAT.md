@@ -1,4 +1,4 @@
-# État du projet all-in-one — dernière mise à jour : 2026-07-03
+# État du projet all-in-one — dernière mise à jour : 2026-07-04
 
 > Suivi centralisé des DEUX repos. Lire ce fichier en premier à chaque session.
 > Repos : Frontend (Next.js, All-in-One-Partner-Hub) · Backend (NestJS).
@@ -17,6 +17,17 @@
 | 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline back MERGÉ** (PR #57, `f50124c`) — reste PR front · **M1 images back MERGÉ** (PR #58, `6de2bfb`) — reste migration à exécuter + vérif front · **M1-b API publique COMPLÈTE** (catalogue + recherche cross-catalogue + toggle visibilité front/back, mergé+poussé `86092e3`/`57562c5`, migration trigram déployée) |
 
 ## En cours / en attente
+- [~] **Fix M1-b — catalogue public « Établissement introuvable » (backend)** : branche
+      `fix/public-catalogue-etablissement-introuvable` **commitée (`3e932e9`)**, à merger. Bug : un
+      établissement VISIBLE listé renvoyait 404 sur son catalogue. Cause = incohérence de contrat
+      (liste résout par **id seul** ; catalogue/fiche/item exigeaient `:type/:id` en path →
+      `/etablissements/{id}/catalogue` retombait sur la route fiche `:type/:id`, `normaliseType(id)`
+      → 404). **Pas** le piège Prisma 5.7 (résolution à plat, pas d'`include` to-one). Fix : routes
+      par **id seul** (`:id`, `:id/catalogue`, `:id/catalogue/:itemId`) + `resolveEtablissementVisible(id)`
+      balayant les 2 tables comme la liste ; garde-fous M1-b intacts (anti-fuite, DISPONIBLE/EPUISE,
+      opt-in, 404 non-visible/inexistant). Tests : e2e-BD **9 suites / 36 verts** (SM+resto par id,
+      non-visible→404, id inexistant→404), unit public 24/24, tsc vert.
+      SESSIONS/2026-07-04-fix-public-catalogue-etablissement.md
 - [x] **M1 (app client) — stockage d'images (backend)** : **PR #58 MERGÉE sur main** (`6de2bfb`).
       Interface abstraite `ImageStorageService` + impl **dossier
       local** (`common/image-storage/`, `@Global`) + miniatures `sharp` (thumb 200² / display
@@ -212,6 +223,10 @@
   applique les migrations, tourne les specs `test/e2e-db/*.db-e2e-spec.ts`, détruit le conteneur.
   Garde-fou `setup-env.ts` : refuse de tourner sans `TEST_DATABASE_URL` et refuse `aio`. Ne JAMAIS
   faire écrire les e2e sur la BD dev.
+- API publique catalogue : un établissement s'adresse par **id seul** (`/public/v1/etablissements/:id`,
+  `…/:id/catalogue`, `…/:id/catalogue/:itemId`), comme la liste. Le `type` (SM/resto) est résolu côté
+  service en balayant les 2 tables — ne JAMAIS le remettre dans l'URL (c'est ce qui causait le faux 404
+  « Établissement introuvable » sur un établissement visible). Fix `fix/public-catalogue-etablissement-introuvable`.
 - Règle permanente : aucune trace de Claude/IA dans le git.
 - **Incident 2026-07-03 — disque `C:` plein (0 o)** : a fait planter `tsc` en OOM par intermittence
   ET fait passer le **FS interne de Docker en lecture seule** → `docker run/rm` échouent
