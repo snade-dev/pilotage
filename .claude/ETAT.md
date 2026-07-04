@@ -17,8 +17,8 @@
 | 6 Fonctionnalités | front + back | 🟡 stats mergé · **POS offline back MERGÉ** (PR #57, `f50124c`) — reste PR front · **M1 images back MERGÉ** (PR #58, `6de2bfb`) — reste migration à exécuter + vérif front · **M1-b API publique COMPLÈTE** (catalogue + recherche cross-catalogue + toggle visibilité front/back, mergé+poussé `86092e3`/`57562c5`, migration trigram déployée) |
 
 ## En cours / en attente
-- [~] **Fix M1-b — catalogue public « Établissement introuvable » (backend)** : branche
-      `fix/public-catalogue-etablissement-introuvable` **commitée (`3e932e9`)**, à merger. Bug : un
+- [x] **Fix M1-b — catalogue public « Établissement introuvable » (backend)** : **MERGÉ sur
+      `main` (`32d0ce2`, commit `3e932e9`)** — URL corrigée testée OK manuellement. Non poussé. Bug : un
       établissement VISIBLE listé renvoyait 404 sur son catalogue. Cause = incohérence de contrat
       (liste résout par **id seul** ; catalogue/fiche/item exigeaient `:type/:id` en path →
       `/etablissements/{id}/catalogue` retombait sur la route fiche `:type/:id`, `normaliseType(id)`
