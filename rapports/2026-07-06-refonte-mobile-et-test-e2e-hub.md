@@ -86,13 +86,28 @@ Constats backend (à traiter côté backend, pas de correctif front possible) :
 | 6 | Bouton dev « Suivant (sans validation) » visible sur le signup | `partner-signup-form.tsx:222-229` — bouton `forceNextStep` non conditionné | L'entourer de `process.env.NODE_ENV === "development"` (ou le supprimer) | 1 ligne |
 | 7 | SIRET obligatoire à l'inscription (incongru au Mali) | `signup-step-two.tsx:190-208` + schéma zod (14 chiffres requis) ; côté backend `siret String` **non-nullable et unique** sur Supermarche/Restaurant (`schema.prisma:613/675`) | Décision produit : renommer « N° registre de commerce (RCCM/NIF) » sans format imposé, ou rendre optionnel (→ **migration Prisma** + contrainte unique à revoir) | front : ~10 lignes ; backend : migration |
 
-Ordre suggéré : #1, #4, #6 (triviaux) → #2, #3, #5 (ticket/labels) → #7 (décision produit).
+### Correction des 7 défauts (même jour, soir) — TOUT FAIT ✅
+
+- **#1 nom dupliqué POS** : plus de concaténation quand la variante est celle par défaut / porte le nom du produit.
+- **#2 UUID sur le ticket** : la vente locale porte désormais `paymentMethodLabel` (résolu depuis les configs BD) — utilisé par le ticket écran, l'impression **et** le reçu WhatsApp ; plus de suffixe FCFA sur cette ligne.
+- **#3 « Session: N/A »** : la vente porte `sessionStart` (ISO) affiché en `dd/MM HH:mm` (le parse de l'UUID comme date est un secours legacy).
+- **#4 prix en ligne** : plus requis — vide → prix de vente (seul le négatif est bloqué).
+- **#5 type « Inconnu »** : `mapBackendConfig` lit la relation `typeMoyenPaiementPOS` renvoyée par le backend. Effet bonus : la détection « Espèces » (`code === 'ESPECES'`) refonctionne → champ « Montant reçu » + monnaie à rendre de retour dans le dialog de paiement.
+- **#6 bouton dev signup** : visible uniquement en `NODE_ENV === development`.
+- **#7 SIRET optionnel** (décision : optionnel, pas de renommage) :
+  - Prisma : `siret String?` sur Supermarche + Restaurant — migration `make_siret_optional` appliquée en local.
+  - DTOs create (etablissement/inscription, supermarché, restaurant) : `@IsOptional()`, format 14 chiffres exigé seulement si fourni.
+  - Services : garde `if (siret)` sur les vérifications d'unicité (sinon `siret: undefined` matchait n'importe quelle ligne → « SIRET existe déjà » à tort). Corrigé dans supermarche.service ×2 et etablissement.service ; restaurant.service était déjà gardé.
+  - Front : zod optionnel (14 chiffres si saisi), labels « SIRET (optionnel) » (signup + modal Hub Propriétaire), chaîne vide → non envoyé.
+  - **Testé** : inscription complète sans SIRET → « Inscription réussie » ✓ (compte de test : `test.sans.siret@gmail.com`).
+
+⚠️ **Incident évité pendant la migration** : `prisma migrate dev` a droppé les index trigram de la recherche publique (`produit_magasin_nom_trgm_idx`, `plat_nom_trgm_idx`) — créés en SQL brut (gin_trgm_ops non représentable dans le schéma), Prisma les voit comme du drift. Restaurés aussitôt par la migration `restore_public_search_trgm`. **Règle à retenir : après chaque `prisma migrate dev`, vérifier que le SQL généré ne contient pas de `DROP INDEX ..._trgm_idx`.**
 
 ### Reste à faire
 
-1. Corriger les 7 défauts cosmétiques ci-dessus (détail + effort estimé dans le tableau).
-2. Uniformiser la convention backend (ID toujours déduit du JWT, jamais accepté en query) pour éviter que le pattern whitelist revienne.
-3. Tester la verticale restaurant de bout en bout (les correctifs restaurant sont vérifiés contre les DTO mais pas exercés en runtime, faute d'établissement restaurant de test).
+1. Uniformiser la convention backend (ID toujours déduit du JWT, jamais accepté en query) pour éviter que le pattern whitelist revienne.
+2. Tester la verticale restaurant de bout en bout (les correctifs restaurant sont vérifiés contre les DTO mais pas exercés en runtime).
+3. Déployer les 2 migrations (`make_siret_optional`, `restore_public_search_trgm`) sur les autres environnements avec les autres migrations en attente.
 
 ### Environnement / données de test
 
