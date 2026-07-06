@@ -74,12 +74,25 @@ Constats backend (à traiter côté backend, pas de correctif front possible) :
 - ✅ Backend rebuildé/redémarré (`node dist/main` — attention : pas de watch, penser à rebuild après chaque modif backend).
 - ✅ Tout commité sur `main` des 4 repos (backend, Hub ×2 commits, app mobile, pilotage).
 
+### Défauts cosmétiques — détail (cause exacte + correctif proposé)
+
+| # | Défaut | Cause (fichier:ligne) | Correctif proposé | Effort |
+|---|---|---|---|---|
+| 1 | Nom produit dupliqué au POS (« Coca-Cola 33cl Coca-Cola 33cl ») | `pos/page.tsx:240` — `name = p.nom + ' ' + v.nom` sauf si `v.nom === "Standard"` ; or la variante par défaut créée par le backend porte le **nom du produit**, donc concaténation en doublon | Ne pas concaténer si `v.isDefault === true` ou `v.nom === p.nom` | 1 ligne |
+| 2 | Ticket : UUID du moyen de paiement (« MODE PAIEMENT 1ff613b9-… FCFA ») | `print-receipt-modal.tsx:159` — `paymentMethodLabels[sale.paymentMethod]` est un mapping statique legacy (`cash`, `card`…) alors que `paymentMethod` est désormais l'**ID de config BD** → fallback sur l'UUID brut ; `ReceiptRow` suffixe en plus la valeur par « FCFA » | Stocker le **label** (`nomPersonnalise`) dans la vente locale au moment de l'encaissement (le paiement mixte le fait déjà via `p.label`) et l'afficher ; ne pas suffixer FCFA pour cette ligne | ~10 lignes |
+| 3 | Ticket : « Session: N/A » | `print-receipt-modal.tsx:96-102` — le code tente de **parser `sessionId` comme une date** ; c'est un UUID → toujours N/A | Afficher la référence de session ou l'heure d'ouverture (`sessionDetails.startTime`) | ~5 lignes |
+| 4 | « Prix en ligne » affiché « Auto: 500 » mais bloque si vide | `product-wizard-form.tsx:503-508` — la validation de l'étape 2 exige le champ, alors que le placeholder promet l'auto-remplissage et que le mapping (`supermarche-produits.ts`) retombe déjà sur `prixHt` si absent | Supprimer la validation « requis » sur `onlinePrice` (vide → `prixHt`) | 3 lignes |
+| 5 | Paramètres → Moyens de paiement : type « Inconnu » | `payment-methods-settings.tsx:346` — `config.type?.nom \|\| "Inconnu"` ; `mapBackendConfig` (`use-pos-payment-methods.ts:39-62`) ne reconstruit `type` que si la réponse contient un champ `type` en string, or le backend renvoie la relation sous un autre nom (`typeMoyenPaiementPOS`) | Mapper aussi `item.typeMoyenPaiementPOS?.nom`/`code` dans `mapBackendConfig` (vérifier la forme réelle de la réponse) | ~5 lignes |
+| 6 | Bouton dev « Suivant (sans validation) » visible sur le signup | `partner-signup-form.tsx:222-229` — bouton `forceNextStep` non conditionné | L'entourer de `process.env.NODE_ENV === "development"` (ou le supprimer) | 1 ligne |
+| 7 | SIRET obligatoire à l'inscription (incongru au Mali) | `signup-step-two.tsx:190-208` + schéma zod (14 chiffres requis) ; côté backend `siret String` **non-nullable et unique** sur Supermarche/Restaurant (`schema.prisma:613/675`) | Décision produit : renommer « N° registre de commerce (RCCM/NIF) » sans format imposé, ou rendre optionnel (→ **migration Prisma** + contrainte unique à revoir) | front : ~10 lignes ; backend : migration |
+
+Ordre suggéré : #1, #4, #6 (triviaux) → #2, #3, #5 (ticket/labels) → #7 (décision produit).
+
 ### Reste à faire
 
-1. Uniformiser la convention backend (ID toujours déduit du JWT, jamais accepté en query) pour éviter que le pattern revienne.
-2. Tester la verticale restaurant de bout en bout (les correctifs restaurant sont vérifiés contre les DTO mais pas exercés en runtime, faute d'établissement restaurant de test).
-3. Cosmétique restant : nom produit dupliqué au POS, UUID du moyen de paiement sur le ticket, bouton dev « Suivant (sans validation) » du signup, SIRET obligatoire à revoir pour le marché malien.
-4. Push des 4 repos vers leurs remotes.
+1. Corriger les 7 défauts cosmétiques ci-dessus (détail + effort estimé dans le tableau).
+2. Uniformiser la convention backend (ID toujours déduit du JWT, jamais accepté en query) pour éviter que le pattern whitelist revienne.
+3. Tester la verticale restaurant de bout en bout (les correctifs restaurant sont vérifiés contre les DTO mais pas exercés en runtime, faute d'établissement restaurant de test).
 
 ### Environnement / données de test
 
