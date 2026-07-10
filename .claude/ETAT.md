@@ -1,4 +1,4 @@
-# État All-in-One — 2026-07-08
+# État All-in-One — 2026-07-10
 
 > Curseur du projet. Ne contient que le PRÉSENT et le futur immédiat.
 > Historique des jalons terminés → ROADMAP.md (coché) + SESSIONS/ (détail).
@@ -19,6 +19,27 @@
 | App mobile cliente (repo dédié, étapes 1-3 + kanban commerçant) | app | ✅ mergé main |
 | Flux cuisine restaurant (statut PRETE + onglet Cuisine POS) | back+front | ✅ (2 migrations à déployer) |
 | **Livraison à domicile + suivi GPS livreur** | 5 repos | ✅ **implémenté, E2E backend vert, login livreur testé device** |
+| **Couverture de tests pré-déploiement (Phase B)** | back+front+app | 🟡 **écrite, suites vertes, branches `test/coverage-predeploy` NON commitées (relecture)** |
+
+## Tests pré-déploiement — état détaillé (chantier courant)
+- **Backend** : 356 → 412 tests (410 verts + 2 skips documentant un bug). Footgun jest-e2e corrigé
+  (les db-specs ne peuvent plus tourner hors conteneur jetable). Ajouts : séparation tokens
+  client/employé sur vraies routes (31 tests), expiration/reprise OTP, machine à états commandes
+  retrait + décrément défaut + isolation écriture, anti-fuite API publique (clés EXACTES + feed),
+  isolation mouvements stock. **BUG BLOQUANT consigné** : `supermarche/mouvement-produit-magasin-stock`
+  sans aucune vérification tenant contre le JWT (lecture + création cross-tenant) — 2 tests skippés
+  à réactiver après correctif. → `SESSIONS/2026-07-10-phase-b-tests-backend.md`
+- **Front Hub** : 23 → 191 tests (188 verts + 3 skips = bugs réels), 24 fichiers spec. Outillage
+  jsdom/RTL/fake-indexeddb ajouté, typecheck 0 erreur, suite relancée 3× sans flaky. Bugs confirmés :
+  payload POS resto sans options/remises de ligne (bloquant), TVA resto en dur sans tauxTVAId (majeur),
+  fallback ligneCommandeId=saleId dans useRefunds (majeur). → `SESSIONS/2026-07-10-phase-b-tests-front-hub.md`
+- **App cliente** : 0 → 203 tests (199 verts + 4 skips = bugs réels : clientRequestId partagé
+  retrait/livraison, message « session expirée » sur panne réseau du refresh, course d'hydratation
+  du panier, détour connexion pendant `chargement`). Couverture totale US-01→US-14. Outillage
+  jest-expo 57 + RNTL 13, contrats backend figés dans les mocks, 3 runs sans flaky, tsc 0 erreur.
+  → `SESSIONS/2026-07-10-phase-b-tests-app-cliente.md`
+- **Phase C à planifier** : correction des 8 bugs consignés (1 bloquant sécurité back, 1 bloquant
+  argent front resto, 2 majeurs front, 1 majeur app, 3 mineurs app) puis dé-skip des tests.
 
 ## Livraison — état détaillé (chantier courant)
 - **Backend** : `StatutLivraison` (RECUE→EN_PREPARATION→PRETE→EN_LIVRAISON→LIVREE), `PositionLivreur`,
@@ -33,6 +54,9 @@
   rayon 10 km). Détail complet → mémoire `project_livraison`.
 
 ## En cours / en attente
+- [ ] **Relecture + commit des 3 branches `test/coverage-predeploy`** (back, front Hub, app cliente)
+      — validation repo par repo, aucun commit fait.
+- [ ] **Phase C — corriger les 8 bugs consignés par les tests** puis réactiver les skips.
 - [ ] **Test manuel bout-en-bout livraison sur devices** : login livreur OK ; reste le flux complet
       (commande client → kanban Hub → assigner → démarrer → suivi carte live → livrer avec code).
 - [ ] **Migrations à déployer en prod** (appliquées en local seulement) :
