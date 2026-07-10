@@ -38,8 +38,27 @@
   du panier, détour connexion pendant `chargement`). Couverture totale US-01→US-14. Outillage
   jest-expo 57 + RNTL 13, contrats backend figés dans les mocks, 3 runs sans flaky, tsc 0 erreur.
   → `SESSIONS/2026-07-10-phase-b-tests-app-cliente.md`
-- **Phase C à planifier** : correction des 8 bugs consignés (1 bloquant sécurité back, 1 bloquant
-  argent front resto, 2 majeurs front, 1 majeur app, 3 mineurs app) puis dé-skip des tests.
+- **Phase C FAITE (2026-07-10)** — les 8 bugs corrigés, tous les skips réactivés, plus aucun skip :
+  - **Backend** : isolation tenant corrigée sur `/supermarche/mouvement` + jumeau
+    `/restaurant/mouvement-plat-stock` (id d'établissement depuis le JWT + seam
+    EstablishmentAccess, pattern inventaire) ; `configuration-etablissement` verrouillée pareil
+    (8 routes, ids clients vérifiés, contrat Hub préservé) ; `GET /restaurant/plat/recherche`
+    renvoie les options (POS resto) ; suites 291+47+85 vertes ×2.
+    → `SESSIONS/2026-07-10-phase-c-fix-backend.md`
+  - **Front Hub** : options + `tauxTVAId` dans le payload vente resto (online/offline), total UI
+    aligné sur le recalcul serveur (TVA sur HT puis remise globale sur TTC), remise par article
+    resto refusée à la saisie (DTO backend ne la supporte pas), remboursement sans `lineId`
+    refusé + `lineId` mappé depuis la réponse de vente ; 193 tests verts ×2, typecheck 0, build OK.
+    → `SESSIONS/2026-07-10-phase-c-fix-front-hub.md`
+  - **App cliente** : clientRequestId séparé retrait/livraison, erreur réseau ≠ « session
+    expirée » au refresh (tokens conservés), ajout panier pré-hydratation préservé, Commander
+    inerte pendant le chargement de session ; 204/204 verts ×2, tsc 0 erreur.
+    → `SESSIONS/2026-07-10-phase-c-fix-app-cliente.md`
+- **Décisions ouvertes issues de la Phase C** :
+  - Remise par ligne resto : `LigneVentePlatDto` ne la supporte pas (parité supermarché à faire
+    côté back si voulue) — d'ici là le POS resto renvoie vers la remise globale.
+  - `GET /configuration-etablissement/liste` (« admin ») liste toutes les configs à tout staff —
+    intention à trancher avant d'ajouter un guard.
 
 ## Livraison — état détaillé (chantier courant)
 - **Backend** : `StatutLivraison` (RECUE→EN_PREPARATION→PRETE→EN_LIVRAISON→LIVREE), `PositionLivreur`,
@@ -54,9 +73,8 @@
   rayon 10 km). Détail complet → mémoire `project_livraison`.
 
 ## En cours / en attente
-- [ ] **Relecture + commit des 3 branches `test/coverage-predeploy`** (back, front Hub, app cliente)
-      — validation repo par repo, aucun commit fait.
-- [ ] **Phase C — corriger les 8 bugs consignés par les tests** puis réactiver les skips.
+- [ ] **Relecture + commit des correctifs Phase C** (3 branches `test/coverage-predeploy`,
+      working trees non commités) puis merge des branches sur main.
 - [ ] **Test manuel bout-en-bout livraison sur devices** : login livreur OK ; reste le flux complet
       (commande client → kanban Hub → assigner → démarrer → suivi carte live → livrer avec code).
 - [ ] **Migrations à déployer en prod** (appliquées en local seulement) :
