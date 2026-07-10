@@ -19,7 +19,7 @@
 | App mobile cliente (repo dédié, étapes 1-3 + kanban commerçant) | app | ✅ mergé main |
 | Flux cuisine restaurant (statut PRETE + onglet Cuisine POS) | back+front | ✅ (2 migrations à déployer) |
 | **Livraison à domicile + suivi GPS livreur** | 5 repos | ✅ **implémenté, E2E backend vert, login livreur testé device** |
-| **Couverture de tests pré-déploiement (Phase B)** | back+front+app | 🟡 **écrite, suites vertes, branches `test/coverage-predeploy` NON commitées (relecture)** |
+| **Couverture de tests pré-déploiement (Phases B+C)** | back+front+app | ✅ **820 tests verts, 8 bugs + 2 failles corrigés, mergé main (à pousser)** |
 
 ## Tests pré-déploiement — état détaillé (chantier courant)
 - **Backend** : 356 → 412 tests (410 verts + 2 skips documentant un bug). Footgun jest-e2e corrigé
@@ -73,8 +73,8 @@
   rayon 10 km). Détail complet → mémoire `project_livraison`.
 
 ## En cours / en attente
-- [ ] **Relecture + commit des correctifs Phase C** (3 branches `test/coverage-predeploy`,
-      working trees non commités) puis merge des branches sur main.
+- [x] Phases B+C tests pré-déploiement : commitées et **mergées sur main** (2026-07-10,
+      fast-forward, les 3 repos).
 - [ ] **Test manuel bout-en-bout livraison sur devices** : login livreur OK ; reste le flux complet
       (commande client → kanban Hub → assigner → démarrer → suivi carte live → livrer avec code).
 - [ ] **Migrations à déployer en prod** (appliquées en local seulement) :
